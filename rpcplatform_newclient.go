@@ -48,6 +48,9 @@ func (p *RPCPlatform) NewClient(target string) (*Client, error) {
 		client:   client,
 	}
 
-	c.stateWatcher()
-	return c, err
+	if err = c.stateWatcher(); err != nil {
+		return nil, err
+	}
+
+	return c, nil
 }

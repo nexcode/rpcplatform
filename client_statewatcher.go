@@ -19,16 +19,19 @@ package rpcplatform
 import (
 	"context"
 	etcd "go.etcd.io/etcd/client/v3"
+	"time"
 )
 
-func (c *Client) stateWatcher() {
-	nameAddr := map[string]string{}
+func (c *Client) stateWatcher() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
+	resp, err := c.etcd.Get(ctx, c.target+"/", etcd.WithPrefix())
+	cancel()
 
-	resp, err := c.etcd.Get(context.Background(), c.target+"/", etcd.WithPrefix())
 	if err != nil {
-		panic(err)
+		return err
 	}
 
+	nameAddr := make(map[string]string, len(resp.Kvs))
 	for _, kv := range resp.Kvs {
 		nameAddr[string(kv.Key)] = string(kv.Value)
 	}
@@ -53,4 +56,6 @@ func (c *Client) stateWatcher() {
 			c.updateState(nameAddr)
 		}
 	}()
+
+	return nil
 }
