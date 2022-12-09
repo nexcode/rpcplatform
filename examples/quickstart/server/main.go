@@ -53,7 +53,7 @@ func main() {
 		panic(err)
 	}
 
-	server, err := rpcp.NewServer("server", "localhost:")
+	server, err := rpcp.NewServer("server", "localhost:", nil)
 	if err != nil {
 		panic(err)
 	}

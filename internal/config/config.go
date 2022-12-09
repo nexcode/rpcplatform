@@ -23,7 +23,8 @@ import (
 )
 
 type Config struct {
-	Etcd          *etcd.Client
+	EtcdClient    *etcd.Client
+	EtcdPrefix    string
 	GRPCOptions   GRPCOptions
 	OpenTelemetry OpenTelemetryConfig
 }

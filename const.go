@@ -14,13 +14,6 @@
  * limitations under the License.
  */
 
-package resolver
+package rpcplatform
 
-import (
-	"google.golang.org/grpc/resolver"
-)
-
-func (r *Resolver) Build(_ resolver.Target, clientConn resolver.ClientConn, _ resolver.BuildOptions) (resolver.Resolver, error) {
-	r.clientConn = clientConn
-	return r, nil
-}
+const balancerName = "balancer"

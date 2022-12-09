@@ -16,17 +16,27 @@
 
 package rpcplatform
 
-import "google.golang.org/grpc/resolver"
+import (
+	"google.golang.org/grpc/resolver"
+)
 
-func (c *Client) updateState(nameAddr map[string]string) {
+func (c *Client) updateState(serverInfo map[string]string) {
+	tree := c.makeServerInfo(serverInfo)
+
 	state := resolver.State{
-		Addresses: make([]resolver.Address, 0, len(nameAddr)),
+		Addresses: make([]resolver.Address, 0, len(tree)),
 	}
 
-	for _, addr := range nameAddr {
-		state.Addresses = append(state.Addresses, resolver.Address{
-			Addr: addr,
-		})
+	for _, value := range tree {
+		address := resolver.Address{
+			Addr: value.address,
+		}
+
+		for key, value := range value.attributes {
+			address.Attributes = address.Attributes.WithValue(key, value)
+		}
+
+		state.Addresses = append(state.Addresses, address)
 	}
 
 	c.resolver.UpdateState(state)

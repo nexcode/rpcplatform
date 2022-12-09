@@ -17,15 +17,32 @@
 package rpcplatform
 
 import (
-	etcd "go.etcd.io/etcd/client/v3"
-	"google.golang.org/grpc"
-	"net"
+	"strings"
 )
 
-type Server struct {
-	name       string
-	etcd       *etcd.Client
-	server     *grpc.Server
-	listener   net.Listener
-	attributes *ServerAttributes
+type addrAndAttrs struct {
+	address    string
+	attributes map[string]string
+}
+
+func (c *Client) makeServerInfo(serverInfo map[string]string) map[string]*addrAndAttrs {
+	tree := map[string]*addrAndAttrs{}
+
+	for key, value := range serverInfo {
+		path := strings.SplitN(key, "/", 2)
+
+		if tree[path[0]] == nil {
+			tree[path[0]] = &addrAndAttrs{
+				attributes: map[string]string{},
+			}
+		}
+
+		if len(path) == 1 {
+			tree[path[0]].address = value
+		} else {
+			tree[path[0]].attributes[path[1]] = value
+		}
+	}
+
+	return tree
 }

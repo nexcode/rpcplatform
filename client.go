@@ -17,14 +17,14 @@
 package rpcplatform
 
 import (
-	"github.com/nexcode/rpcplatform/internal/resolver"
 	etcd "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/resolver/manual"
 )
 
 type Client struct {
 	target   string
 	etcd     *etcd.Client
 	client   *grpc.ClientConn
-	resolver *resolver.Resolver
+	resolver *manual.Resolver
 }

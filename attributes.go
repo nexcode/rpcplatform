@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-package resolver
+package rpcplatform
 
-import (
-	"fmt"
-	"google.golang.org/grpc/resolver"
-)
-
-func (r *Resolver) UpdateState(state resolver.State) {
-	if err := r.clientConn.UpdateState(state); err != nil {
-		fmt.Println(err)
-	}
+func Attributes() attributes {
+	return attributes{}
 }
+
+type attributes struct{}

@@ -24,7 +24,7 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
-	"go.opentelemetry.io/otel/semconv/v1.12.0"
+	"go.opentelemetry.io/otel/semconv/v1.17.0"
 	"google.golang.org/grpc"
 	"strings"
 	"time"
@@ -43,7 +43,7 @@ func OpenTelemetry(options interface{}, config config.OpenTelemetryConfig, addr 
 	if addr != "" {
 		addr := strings.Split(addr, ":")
 		resOptions = append(resOptions,
-			resource.WithAttributes(semconv.NetHostIPKey.String(addr[0])),
+			resource.WithAttributes(semconv.NetSockHostAddrKey.String(addr[0])),
 			resource.WithAttributes(semconv.NetHostPortKey.String(addr[1])),
 		)
 	}

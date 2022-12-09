@@ -35,7 +35,7 @@ func (s *Server) Serve() error {
 	}()
 
 	go func() {
-		path := gears.FixPath(s.name + "/" + gears.UID())
+		path := s.name + "/" + gears.UID()
 
 		for {
 			if !serving {
@@ -58,6 +58,18 @@ func (s *Server) Serve() error {
 			if err != nil {
 				fmt.Println(err)
 				continue
+			}
+
+			if s.attributes != nil {
+				for key, value := range s.attributes.m {
+					ctx, cancel = context.WithTimeout(global, 4*time.Second)
+					_, err = s.etcd.Put(ctx, path+"/"+key, value, etcd.WithLease(lease.ID))
+					cancel()
+
+					if err != nil {
+						fmt.Println(err)
+					}
+				}
 			}
 
 			keepAlive, err := s.etcd.KeepAlive(global, lease.ID)

@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
-package resolver
+package rpcplatform
 
-func (*Resolver) Close() {}
+import "strconv"
+
+func (a attributes) Server() *ServerAttributes {
+	return &ServerAttributes{
+		m: map[string]string{},
+	}
+}
+
+type ServerAttributes struct {
+	m map[string]string
+}
+
+func (sa *ServerAttributes) SetBalancerWeight(weight int) {
+	sa.m["balancerWeight"] = strconv.Itoa(weight)
+}

@@ -29,7 +29,7 @@ func (p *RPCPlatform) NewClient(target string) (*Client, error) {
 
 	options := append(p.config.GRPCOptions.Client,
 		grpc.WithResolvers(resolver),
-		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"round_robin":{}}]}`),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"`+balancerName+`":{}}]}`),
 	)
 
 	if err := grpcinject.Injections(&options, p.config, ""); err != nil {
@@ -42,8 +42,8 @@ func (p *RPCPlatform) NewClient(target string) (*Client, error) {
 	}
 
 	c := &Client{
-		target:   gears.FixPath(target),
-		etcd:     p.config.Etcd,
+		target:   p.config.EtcdPrefix + gears.FixPath(target) + "/",
+		etcd:     p.config.EtcdClient,
 		resolver: resolver,
 		client:   client,
 	}

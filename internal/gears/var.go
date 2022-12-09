@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package rpcplatform
+package gears
 
 import (
-	etcd "go.etcd.io/etcd/client/v3"
-	"google.golang.org/grpc"
-	"net"
+	"math/rand"
+	"time"
 )
 
-type Server struct {
-	name       string
-	etcd       *etcd.Client
-	server     *grpc.Server
-	listener   net.Listener
-	attributes *ServerAttributes
-}
+var (
+	r = rand.New(rand.NewSource(time.Now().UnixNano()))
+)

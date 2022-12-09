@@ -19,41 +19,45 @@ package rpcplatform
 import (
 	"context"
 	etcd "go.etcd.io/etcd/client/v3"
+	"strings"
 	"time"
 )
 
 func (c *Client) stateWatcher() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
-	resp, err := c.etcd.Get(ctx, c.target+"/", etcd.WithPrefix())
+	resp, err := c.etcd.Get(ctx, c.target, etcd.WithPrefix())
 	cancel()
 
 	if err != nil {
 		return err
 	}
 
-	nameAddr := make(map[string]string, len(resp.Kvs))
+	serverInfo := make(map[string]string, len(resp.Kvs))
 	for _, kv := range resp.Kvs {
-		nameAddr[string(kv.Key)] = string(kv.Value)
+		trimKey := strings.TrimPrefix(string(kv.Key), c.target)
+		serverInfo[trimKey] = string(kv.Value)
 	}
 
-	c.updateState(nameAddr)
+	c.updateState(serverInfo)
 
-	watchChan := c.etcd.Watch(context.Background(), c.target+"/",
+	watchChan := c.etcd.Watch(context.Background(), c.target,
 		etcd.WithPrefix(), etcd.WithRev(resp.Header.Revision+1),
 	)
 
 	go func() {
 		for data := range watchChan {
 			for _, event := range data.Events {
+				trimKey := strings.TrimPrefix(string(event.Kv.Key), c.target)
+
 				switch event.Type {
 				case etcd.EventTypeDelete:
-					delete(nameAddr, string(event.Kv.Key))
+					delete(serverInfo, trimKey)
 				case etcd.EventTypePut:
-					nameAddr[string(event.Kv.Key)] = string(event.Kv.Value)
+					serverInfo[trimKey] = string(event.Kv.Value)
 				}
 			}
 
-			c.updateState(nameAddr)
+			c.updateState(serverInfo)
 		}
 	}()
 

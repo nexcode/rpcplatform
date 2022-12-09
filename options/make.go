@@ -21,9 +21,10 @@ import (
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
-func Make(etcdClient *etcd.Client, options []Option) *config.Config {
+func Make(etcdClient *etcd.Client, etcdPrefix string, options []Option) *config.Config {
 	config := &config.Config{
-		Etcd: etcdClient,
+		EtcdClient: etcdClient,
+		EtcdPrefix: etcdPrefix,
 	}
 
 	for _, option := range options {

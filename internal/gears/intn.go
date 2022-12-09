@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-package rpcplatform
+package gears
 
-import (
-	etcd "go.etcd.io/etcd/client/v3"
-	"google.golang.org/grpc"
-	"net"
-)
-
-type Server struct {
-	name       string
-	etcd       *etcd.Client
-	server     *grpc.Server
-	listener   net.Listener
-	attributes *ServerAttributes
+func Intn(n int) int {
+	return r.Intn(n)
 }

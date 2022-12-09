@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-package resolver
+package balancer
 
-import "google.golang.org/grpc/resolver"
+import (
+	"google.golang.org/grpc/balancer"
+)
 
-func (*Resolver) Scheme() string {
-	return resolver.GetDefaultScheme()
+func (p *picker) Pick(balancer.PickInfo) (balancer.PickResult, error) {
+	p.mu.Lock()
+	subConn := p.subConns[p.next]
+	p.next = (p.next + 1) % len(p.subConns)
+	p.mu.Unlock()
+
+	return balancer.PickResult{
+		SubConn: subConn,
+	}, nil
 }

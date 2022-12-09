@@ -17,28 +17,25 @@
 package rpcplatform
 
 import (
+	"github.com/nexcode/rpcplatform/internal/balancer"
 	"github.com/nexcode/rpcplatform/internal/config"
 	"github.com/nexcode/rpcplatform/internal/gears"
 	"github.com/nexcode/rpcplatform/options"
 	etcd "go.etcd.io/etcd/client/v3"
-	"go.etcd.io/etcd/client/v3/namespace"
 )
 
 // New creates an RPCPlatform object for further creation of clients and servers.
 // All methods of this object are thread safe. You can create this object once
 // and use it in different places in your program.
 func New(etcdPrefix string, etcdClient *etcd.Client, opts ...options.Option) (*RPCPlatform, error) {
-	config := options.Make(etcdClient, opts)
+	balancer.Register(balancerName)
 
 	if etcdPrefix != "" {
 		etcdPrefix = gears.FixPath(etcdPrefix)
-		config.Etcd.KV = namespace.NewKV(config.Etcd.KV, etcdPrefix)
-		config.Etcd.Lease = namespace.NewLease(config.Etcd.Lease, etcdPrefix)
-		config.Etcd.Watcher = namespace.NewWatcher(config.Etcd.Watcher, etcdPrefix)
 	}
 
 	return &RPCPlatform{
-		config: config,
+		config: options.Make(etcdClient, etcdPrefix, opts),
 	}, nil
 }
 

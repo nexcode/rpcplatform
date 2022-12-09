@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package resolver
+package balancer
 
-import (
-	"google.golang.org/grpc/resolver"
-)
-
-func (r *Resolver) ResolveNow(_ resolver.ResolveNowOptions) {}
+type pickerBuilder struct{}

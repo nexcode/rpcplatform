@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package rpcplatform
+package balancer
 
 import (
-	etcd "go.etcd.io/etcd/client/v3"
-	"google.golang.org/grpc"
-	"net"
+	"google.golang.org/grpc/balancer"
+	"google.golang.org/grpc/balancer/base"
 )
 
-type Server struct {
-	name       string
-	etcd       *etcd.Client
-	server     *grpc.Server
-	listener   net.Listener
-	attributes *ServerAttributes
+func (pb *pickerBuilder) Build(pickerInfo base.PickerBuildInfo) balancer.Picker {
+	if len(pickerInfo.ReadySCs) == 0 {
+		return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
+	}
+
+	connInfoArr, totalWeight := pb.makeConnInfo(pickerInfo)
+	return pb.makePicker(connInfoArr, totalWeight)
 }

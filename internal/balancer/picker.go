@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package rpcplatform
+package balancer
 
 import (
-	etcd "go.etcd.io/etcd/client/v3"
-	"google.golang.org/grpc"
-	"net"
+	"google.golang.org/grpc/balancer"
+	"sync"
 )
 
-type Server struct {
-	name       string
-	etcd       *etcd.Client
-	server     *grpc.Server
-	listener   net.Listener
-	attributes *ServerAttributes
+type picker struct {
+	subConns []balancer.SubConn
+	mu       sync.Mutex
+	next     int
 }

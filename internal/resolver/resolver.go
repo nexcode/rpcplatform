@@ -18,12 +18,9 @@ package resolver
 
 import (
 	"google.golang.org/grpc/resolver"
+	"google.golang.org/grpc/resolver/manual"
 )
 
-func NewResolver() *Resolver {
-	return &Resolver{}
-}
-
-type Resolver struct {
-	clientConn resolver.ClientConn
+func NewResolver() *manual.Resolver {
+	return manual.NewBuilderWithScheme(resolver.GetDefaultScheme())
 }
