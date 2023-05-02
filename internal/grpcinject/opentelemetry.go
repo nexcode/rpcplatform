@@ -18,16 +18,17 @@ package grpcinject
 
 import (
 	"context"
+	"strings"
+	"time"
+
 	"github.com/nexcode/rpcplatform/errors"
 	"github.com/nexcode/rpcplatform/internal/config"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
-	"go.opentelemetry.io/otel/semconv/v1.17.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.18.0"
 	"google.golang.org/grpc"
-	"strings"
-	"time"
 )
 
 func OpenTelemetry(options interface{}, config config.OpenTelemetryConfig, addr string) error {
