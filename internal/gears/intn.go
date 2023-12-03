@@ -17,5 +17,5 @@
 package gears
 
 func Intn(n int) int {
-	return r.Intn(n)
+	return rnd.Intn(n)
 }

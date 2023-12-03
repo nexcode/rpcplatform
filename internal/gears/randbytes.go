@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2023 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,16 @@
 package gears
 
 import (
-	"encoding/binary"
-	"encoding/hex"
-	"sync/atomic"
-	"time"
+	"crypto/rand"
+	"io"
 )
 
-func UID() string {
-	var b [16]byte
+func randBytes() [8]byte {
+	var b [8]byte
 
-	copy(b[0:8], unique[:])
-	binary.BigEndian.PutUint32(b[8:12], atomic.AddUint32(&counter, 1))
-	binary.BigEndian.PutUint32(b[12:16], uint32(time.Now().Unix()))
+	if _, err := io.ReadFull(rand.Reader, b[:]); err != nil {
+		panic(err)
+	}
 
-	return hex.EncodeToString(b[:])
+	return b
 }

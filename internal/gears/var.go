@@ -22,5 +22,7 @@ import (
 )
 
 var (
-	r = rand.New(rand.NewSource(time.Now().UnixNano()))
+	rnd     = rand.New(rand.NewSource(time.Now().UnixNano()))
+	unique  = randBytes()
+	counter = randUint32()
 )
