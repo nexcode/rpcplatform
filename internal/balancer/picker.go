@@ -17,8 +17,9 @@
 package balancer
 
 import (
-	"google.golang.org/grpc/balancer"
 	"sync"
+
+	"google.golang.org/grpc/balancer"
 )
 
 type picker struct {

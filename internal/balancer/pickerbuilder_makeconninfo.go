@@ -17,10 +17,11 @@
 package balancer
 
 import (
-	"google.golang.org/grpc/balancer"
-	"google.golang.org/grpc/balancer/base"
 	"math"
 	"strconv"
+
+	"google.golang.org/grpc/balancer"
+	"google.golang.org/grpc/balancer/base"
 )
 
 type connInfo struct {

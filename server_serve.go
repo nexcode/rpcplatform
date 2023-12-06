@@ -19,9 +19,10 @@ package rpcplatform
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/nexcode/rpcplatform/internal/gears"
 	etcd "go.etcd.io/etcd/client/v3"
-	"time"
 )
 
 // Serve starts the gRPC Server and return error if it occurs.

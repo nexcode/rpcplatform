@@ -77,13 +77,11 @@ func OpenTelemetry(options interface{}, config config.OpenTelemetryConfig, addr 
 	switch options := options.(type) {
 	case *[]grpc.DialOption:
 		*options = append(*options,
-			grpc.WithChainUnaryInterceptor(otelgrpc.UnaryClientInterceptor(tracerProvider, propagators)),
-			grpc.WithChainStreamInterceptor(otelgrpc.StreamClientInterceptor(tracerProvider, propagators)),
+			grpc.WithStatsHandler(otelgrpc.NewClientHandler(tracerProvider, propagators)),
 		)
 	case *[]grpc.ServerOption:
 		*options = append(*options,
-			grpc.ChainUnaryInterceptor(otelgrpc.UnaryServerInterceptor(tracerProvider, propagators)),
-			grpc.ChainStreamInterceptor(otelgrpc.StreamServerInterceptor(tracerProvider, propagators)),
+			grpc.StatsHandler(otelgrpc.NewServerHandler(tracerProvider, propagators)),
 		)
 	default:
 		return errors.ErrGRPCOptionsExpected

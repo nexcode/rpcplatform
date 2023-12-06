@@ -3,7 +3,7 @@
 This example contains an already compiled [proto](proto) package.
 Detailed instructions for rebuilding (if needed) are [attached](proto/README.md).
 
-## Launching this demo!
+## Launching this demo
 
 ```shell
 cd examples/quickstart/server
@@ -12,12 +12,12 @@ go run main.go
 
 ```shell
 cd examples/quickstart/server
-go run main.go
+go run .
 ```
 
 ```shell
 cd examples/quickstart/client
-go run main.go
+go run .
 ```
 
 Now two servers and one client are running!  

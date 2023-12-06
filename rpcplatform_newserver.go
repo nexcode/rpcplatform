@@ -17,10 +17,11 @@
 package rpcplatform
 
 import (
+	"net"
+
 	"github.com/nexcode/rpcplatform/internal/gears"
 	"github.com/nexcode/rpcplatform/internal/grpcinject"
 	"google.golang.org/grpc"
-	"net"
 )
 
 // NewServer creates a new server. You need to provide the server name, address and attributes.

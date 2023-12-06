@@ -17,9 +17,10 @@
 package rpcplatform
 
 import (
+	"net"
+
 	etcd "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
-	"net"
 )
 
 type Server struct {

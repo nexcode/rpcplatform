@@ -1,0 +1,9 @@
+go 1.21.5
+
+use (
+	.
+	./examples/opentelemetry/client
+	./examples/opentelemetry/server
+	./examples/quickstart/client
+	./examples/quickstart/server
+)

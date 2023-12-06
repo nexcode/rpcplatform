@@ -19,11 +19,12 @@ package main
 import (
 	"context"
 	"fmt"
+
 	"github.com/nexcode/rpcplatform"
 	"github.com/nexcode/rpcplatform/examples/quickstart/proto"
 	"github.com/nexcode/rpcplatform/options"
 	etcd "go.etcd.io/etcd/client/v3"
-	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/zipkin"
 )
 
@@ -51,7 +52,11 @@ func main() {
 		panic(err)
 	}
 
-	jaegerExporter, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint("http://localhost:14268/api/traces")))
+	otlpExporter, err := otlptracegrpc.New(context.Background(),
+		otlptracegrpc.WithEndpoint("localhost:4317"),
+		otlptracegrpc.WithInsecure(),
+	)
+
 	if err != nil {
 		panic(err)
 	}
@@ -62,7 +67,7 @@ func main() {
 	}
 
 	rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
-		options.OpenTelemetry("server", 1, jaegerExporter, zipkinExporter),
+		options.OpenTelemetry("server", 1, otlpExporter, zipkinExporter),
 	)
 
 	if err != nil {

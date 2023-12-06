@@ -19,6 +19,7 @@ package main
 import (
 	"context"
 	"fmt"
+
 	"github.com/nexcode/rpcplatform"
 	"github.com/nexcode/rpcplatform/examples/quickstart/proto"
 	etcd "go.etcd.io/etcd/client/v3"

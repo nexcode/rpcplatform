@@ -19,16 +19,17 @@ package main
 import (
 	"context"
 	"fmt"
+	"math/rand"
+	"time"
+
 	"github.com/nexcode/rpcplatform"
 	"github.com/nexcode/rpcplatform/examples/quickstart/proto"
 	"github.com/nexcode/rpcplatform/options"
 	etcd "go.etcd.io/etcd/client/v3"
-	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/zipkin"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"math/rand"
-	"time"
 )
 
 func main() {
@@ -40,7 +41,11 @@ func main() {
 		panic(err)
 	}
 
-	jaegerExporter, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint("http://localhost:14268/api/traces")))
+	otlpExporter, err := otlptracegrpc.New(context.Background(),
+		otlptracegrpc.WithEndpoint("localhost:4317"),
+		otlptracegrpc.WithInsecure(),
+	)
+
 	if err != nil {
 		panic(err)
 	}
@@ -52,7 +57,7 @@ func main() {
 
 	rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
 		options.ClientOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
-		options.OpenTelemetry("client", 1, jaegerExporter, zipkinExporter),
+		options.OpenTelemetry("client", 1, otlpExporter, zipkinExporter),
 	)
 
 	if err != nil {

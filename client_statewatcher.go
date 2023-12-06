@@ -18,9 +18,10 @@ package rpcplatform
 
 import (
 	"context"
-	etcd "go.etcd.io/etcd/client/v3"
 	"strings"
 	"time"
+
+	etcd "go.etcd.io/etcd/client/v3"
 )
 
 func (c *Client) stateWatcher() error {
