@@ -7,7 +7,7 @@ Detailed instructions for rebuilding (if needed) are [attached](proto/README.md)
 
 ```shell
 cd examples/quickstart/server
-go run main.go
+go run .
 ```
 
 ```shell
