@@ -37,7 +37,6 @@ func OpenTelemetry(options interface{}, config config.OpenTelemetryConfig, addr 
 		resource.WithOS(),
 		resource.WithProcess(),
 		resource.WithTelemetrySDK(),
-		resource.WithSchemaURL(semconv.SchemaURL),
 		resource.WithAttributes(semconv.ServiceNameKey.String(config.ServiceName)),
 	}
 
