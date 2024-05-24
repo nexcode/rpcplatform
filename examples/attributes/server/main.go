@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2024 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,26 @@ package main
 import (
 	"context"
 	"fmt"
-	"math/rand"
-	"time"
 
 	"github.com/nexcode/rpcplatform"
 	"github.com/nexcode/rpcplatform/examples/quickstart/proto"
-	"github.com/nexcode/rpcplatform/options"
 	etcd "go.etcd.io/etcd/client/v3"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
+
+type sumServer struct {
+	proto.UnimplementedSumServer
+}
+
+func (s *sumServer) Sum(_ context.Context, in *proto.SumRequest) (*proto.SumResponse, error) {
+	a := in.GetA()
+	b := in.GetB()
+
+	fmt.Println("request:", a, "+", b)
+
+	return &proto.SumResponse{
+		Sum: a + b,
+	}, nil
+}
 
 func main() {
 	etcdClient, err := etcd.New(etcd.Config{
@@ -39,37 +49,22 @@ func main() {
 		panic(err)
 	}
 
-	rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
-		options.ClientOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
-	)
-
+	rpcp, err := rpcplatform.New("rpcplatform", etcdClient)
 	if err != nil {
 		panic(err)
 	}
 
-	client, err := rpcp.NewClient("server", nil)
+	attributes := rpcplatform.Attributes().Server()
+	attributes.SetBalancerWeight(4)
+
+	server, err := rpcp.NewServer("server", "localhost:", attributes)
 	if err != nil {
 		panic(err)
 	}
 
-	sumClient := proto.NewSumClient(client.Client())
+	proto.RegisterSumServer(server.Server(), &sumServer{})
 
-	for {
-		time.Sleep(time.Second)
-
-		a := int64(rand.Intn(10))
-		b := int64(rand.Intn(10))
-
-		resp, err := sumClient.Sum(context.Background(), &proto.SumRequest{
-			A: a,
-			B: b,
-		})
-
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-
-		fmt.Println(a, "+", b, "=", resp.GetSum())
+	if err = server.Serve(); err != nil {
+		panic(err)
 	}
 }

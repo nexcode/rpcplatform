@@ -2,6 +2,8 @@ go 1.22.2
 
 use (
 	.
+	./examples/attributes/client
+	./examples/attributes/server
 	./examples/opentelemetry/client
 	./examples/opentelemetry/server
 	./examples/quickstart/client

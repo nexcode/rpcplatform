@@ -17,6 +17,7 @@
 package rpcplatform
 
 import (
+	"github.com/nexcode/rpcplatform/internal/balancer"
 	"github.com/nexcode/rpcplatform/internal/gears"
 	"github.com/nexcode/rpcplatform/internal/grpcinject"
 	"github.com/nexcode/rpcplatform/internal/resolver"
@@ -24,7 +25,10 @@ import (
 )
 
 // NewClient creates a new client. You need to provide the target server name.
-func (p *RPCPlatform) NewClient(target string) (*Client, error) {
+func (p *RPCPlatform) NewClient(target string, attributes *ClientAttributes) (*Client, error) {
+	balancerName := gears.UID()
+	balancer.Register(balancerName, attributes.maxActiveServers)
+
 	resolver := resolver.NewResolver()
 
 	options := append(p.config.GRPCOptions.Client,

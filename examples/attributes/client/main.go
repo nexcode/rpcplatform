@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2024 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,6 @@ import (
 	"github.com/nexcode/rpcplatform/examples/quickstart/proto"
 	"github.com/nexcode/rpcplatform/options"
 	etcd "go.etcd.io/etcd/client/v3"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/exporters/zipkin"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -41,30 +39,18 @@ func main() {
 		panic(err)
 	}
 
-	otlpExporter, err := otlptracegrpc.New(context.Background(),
-		otlptracegrpc.WithEndpoint("localhost:4317"),
-		otlptracegrpc.WithInsecure(),
-	)
-
-	if err != nil {
-		panic(err)
-	}
-
-	zipkinExporter, err := zipkin.New("http://localhost:9411/api/v2/spans")
-	if err != nil {
-		panic(err)
-	}
-
 	rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
 		options.ClientOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
-		options.OpenTelemetry("client", 1, otlpExporter, zipkinExporter),
 	)
 
 	if err != nil {
 		panic(err)
 	}
 
-	client, err := rpcp.NewClient("server", nil)
+	attributes := rpcplatform.Attributes().Client()
+	attributes.SetMaxActiveServers(2)
+
+	client, err := rpcp.NewClient("server", attributes)
 	if err != nil {
 		panic(err)
 	}

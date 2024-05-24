@@ -24,3 +24,4 @@ Just remember that the example above is for testing purposes!
 
 - [QuickStart](examples/quickstart): contains the simplest example without additional features
 - [OpenTelemetry](examples/opentelemetry): example with connecting distributed tracing systems
+- [Attributes](examples/attributes): example using additional settings for client and server

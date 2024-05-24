@@ -31,3 +31,7 @@ type ServerAttributes struct {
 func (sa *ServerAttributes) SetBalancerWeight(weight int) {
 	sa.m["balancerWeight"] = strconv.Itoa(weight)
 }
+
+func (sa *ServerAttributes) SetBalancerPriority(priority int) {
+	sa.m["balancerPriority"] = strconv.Itoa(priority)
+}

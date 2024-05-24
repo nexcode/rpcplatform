@@ -21,8 +21,10 @@ import (
 	"google.golang.org/grpc/balancer/base"
 )
 
-func Register(name string) {
-	balancer.Register(base.NewBalancerBuilder(name, &pickerBuilder{}, base.Config{
+func Register(name string, maxActiveServers int) {
+	balancer.Register(base.NewBalancerBuilder(name, &pickerBuilder{
+		maxActiveServers: maxActiveServers,
+	}, base.Config{
 		HealthCheck: true,
 	}))
 }

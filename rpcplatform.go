@@ -17,7 +17,6 @@
 package rpcplatform
 
 import (
-	"github.com/nexcode/rpcplatform/internal/balancer"
 	"github.com/nexcode/rpcplatform/internal/config"
 	"github.com/nexcode/rpcplatform/internal/gears"
 	"github.com/nexcode/rpcplatform/options"
@@ -28,8 +27,6 @@ import (
 // All methods of this object are thread safe. You can create this object once
 // and use it in different places in your program.
 func New(etcdPrefix string, etcdClient *etcd.Client, opts ...options.Option) (*RPCPlatform, error) {
-	balancer.Register(balancerName)
-
 	if etcdPrefix != "" {
 		etcdPrefix = gears.FixPath(etcdPrefix)
 	}
