@@ -25,7 +25,12 @@ import (
 )
 
 // NewClient creates a new client. You need to provide the target server name.
+// If no additional settings are needed, attributes can be nil.
 func (p *RPCPlatform) NewClient(target string, attributes *ClientAttributes) (*Client, error) {
+	if attributes == nil {
+		attributes = Attributes().Client()
+	}
+
 	balancerName := gears.UID()
 	balancer.Register(balancerName, attributes.maxActiveServers)
 

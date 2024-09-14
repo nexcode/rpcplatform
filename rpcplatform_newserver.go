@@ -27,6 +27,10 @@ import (
 // NewServer creates a new server. You need to provide the server name, address and attributes.
 // If no additional settings are needed, attributes can be nil.
 func (p *RPCPlatform) NewServer(name, addr string, attributes *ServerAttributes) (*Server, error) {
+	if attributes == nil {
+		attributes = Attributes().Server()
+	}
+
 	options := p.config.GRPCOptions.Server
 
 	listener, err := net.Listen("tcp", addr)
