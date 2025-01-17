@@ -17,10 +17,12 @@
 package grpcinject
 
 import (
+	"net"
+
 	"github.com/nexcode/rpcplatform/internal/config"
 )
 
-func Injections(options interface{}, config *config.Config, addr string) error {
+func Injections(options interface{}, config *config.Config, addr net.Addr) error {
 	if err := OpenTelemetry(options, config.OpenTelemetry, addr); err != nil {
 		return err
 	}

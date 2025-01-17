@@ -38,7 +38,7 @@ func (p *RPCPlatform) NewServer(name, addr string, attributes *ServerAttributes)
 		return nil, err
 	}
 
-	if err = grpcinject.Injections(&options, p.config, listener.Addr().String()); err != nil {
+	if err = grpcinject.Injections(&options, p.config, listener.Addr()); err != nil {
 		return nil, err
 	}
 

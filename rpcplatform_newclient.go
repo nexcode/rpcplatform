@@ -41,7 +41,7 @@ func (p *RPCPlatform) NewClient(target string, attributes *ClientAttributes) (*C
 		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"`+balancerName+`":{}}]}`),
 	)
 
-	if err := grpcinject.Injections(&options, p.config, ""); err != nil {
+	if err := grpcinject.Injections(&options, p.config, nil); err != nil {
 		return nil, err
 	}
 

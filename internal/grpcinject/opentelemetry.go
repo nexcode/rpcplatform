@@ -18,6 +18,8 @@ package grpcinject
 
 import (
 	"context"
+	"net"
+	"strconv"
 	"strings"
 	"time"
 
@@ -27,11 +29,11 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.27.0"
 	"google.golang.org/grpc"
 )
 
-func OpenTelemetry(options interface{}, config config.OpenTelemetryConfig, addr string) error {
+func OpenTelemetry(options interface{}, config config.OpenTelemetryConfig, addr net.Addr) error {
 	resOptions := []resource.Option{
 		resource.WithHost(),
 		resource.WithOS(),
@@ -40,11 +42,18 @@ func OpenTelemetry(options interface{}, config config.OpenTelemetryConfig, addr 
 		resource.WithAttributes(semconv.ServiceNameKey.String(config.ServiceName)),
 	}
 
-	if addr != "" {
-		addr := strings.Split(addr, ":")
+	if addr != nil {
+		addrStr := strings.Split(addr.String(), ":")
+
+		port, err := strconv.Atoi(addrStr[1])
+		if err != nil {
+			return err
+		}
+
 		resOptions = append(resOptions,
-			resource.WithAttributes(semconv.NetSockHostAddrKey.String(addr[0])),
-			resource.WithAttributes(semconv.NetHostPortKey.String(addr[1])),
+			resource.WithAttributes(semconv.NetworkTransportKey.String(addr.Network())),
+			resource.WithAttributes(semconv.NetworkLocalAddress(addrStr[0])),
+			resource.WithAttributes(semconv.NetworkLocalPort(port)),
 		)
 	}
 
