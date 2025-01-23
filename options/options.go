@@ -36,7 +36,7 @@ func ServerOptions(options ...grpc.ServerOption) Option {
 
 func OpenTelemetry(serviceName string, sampleRate float64, exporters ...trace.SpanExporter) Option {
 	return newFuncOption(func(c *config.Config) {
-		c.OpenTelemetry = config.OpenTelemetryConfig{
+		c.OpenTelemetry = &config.OpenTelemetryConfig{
 			ServiceName: serviceName,
 			SampleRate:  sampleRate,
 			Exporters:   exporters,

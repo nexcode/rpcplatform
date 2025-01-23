@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package grpcinject
+package rpcplatform
 
 import (
 	"net"
 
-	"github.com/nexcode/rpcplatform/internal/config"
+	"github.com/nexcode/rpcplatform/internal/grpcinject"
 )
 
-func Injections(options interface{}, config *config.Config, addr net.Addr) error {
-	if err := OpenTelemetry(options, config.OpenTelemetry, addr); err != nil {
-		return err
+func (p *RPCPlatform) grpcinject(addr net.Addr) error {
+	if p.config.OpenTelemetry != nil {
+		if err := grpcinject.OpenTelemetry(p.config, addr); err != nil {
+			return err
+		}
 	}
 
 	return nil

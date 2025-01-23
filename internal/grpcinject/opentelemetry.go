@@ -20,10 +20,8 @@ import (
 	"context"
 	"net"
 	"strconv"
-	"strings"
 	"time"
 
-	"github.com/nexcode/rpcplatform/errors"
 	"github.com/nexcode/rpcplatform/internal/config"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel/propagation"
@@ -33,27 +31,30 @@ import (
 	"google.golang.org/grpc"
 )
 
-func OpenTelemetry(options interface{}, config config.OpenTelemetryConfig, addr net.Addr) error {
+func OpenTelemetry(config *config.Config, addr net.Addr) error {
 	resOptions := []resource.Option{
 		resource.WithHost(),
 		resource.WithOS(),
 		resource.WithProcess(),
 		resource.WithTelemetrySDK(),
-		resource.WithAttributes(semconv.ServiceNameKey.String(config.ServiceName)),
+		resource.WithAttributes(semconv.ServiceName(config.OpenTelemetry.ServiceName)),
 	}
 
 	if addr != nil {
-		addrStr := strings.Split(addr.String(), ":")
+		host, port, err := net.SplitHostPort(addr.String())
+		if err != nil {
+			return err
+		}
 
-		port, err := strconv.Atoi(addrStr[1])
+		portInt, err := strconv.Atoi(port)
 		if err != nil {
 			return err
 		}
 
 		resOptions = append(resOptions,
 			resource.WithAttributes(semconv.NetworkTransportKey.String(addr.Network())),
-			resource.WithAttributes(semconv.NetworkLocalAddress(addrStr[0])),
-			resource.WithAttributes(semconv.NetworkLocalPort(port)),
+			resource.WithAttributes(semconv.NetworkLocalAddress(host)),
+			resource.WithAttributes(semconv.NetworkLocalPort(portInt)),
 		)
 	}
 
@@ -66,11 +67,11 @@ func OpenTelemetry(options interface{}, config config.OpenTelemetryConfig, addr 
 	}
 
 	tpOptions := []trace.TracerProviderOption{
-		trace.WithSampler(trace.ParentBased(trace.TraceIDRatioBased(config.SampleRate))),
+		trace.WithSampler(trace.ParentBased(trace.TraceIDRatioBased(config.OpenTelemetry.SampleRate))),
 		trace.WithResource(res),
 	}
 
-	for _, exporter := range config.Exporters {
+	for _, exporter := range config.OpenTelemetry.Exporters {
 		tpOptions = append(tpOptions, trace.WithBatcher(exporter))
 	}
 
@@ -82,17 +83,14 @@ func OpenTelemetry(options interface{}, config config.OpenTelemetryConfig, addr 
 		propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}),
 	)
 
-	switch options := options.(type) {
-	case *[]grpc.DialOption:
-		*options = append(*options,
-			grpc.WithStatsHandler(otelgrpc.NewClientHandler(tracerProvider, propagators)),
-		)
-	case *[]grpc.ServerOption:
-		*options = append(*options,
+	if addr != nil {
+		config.GRPCOptions.Server = append(config.GRPCOptions.Server,
 			grpc.StatsHandler(otelgrpc.NewServerHandler(tracerProvider, propagators)),
 		)
-	default:
-		return errors.ErrGRPCOptionsExpected
+	} else {
+		config.GRPCOptions.Client = append(config.GRPCOptions.Client,
+			grpc.WithStatsHandler(otelgrpc.NewClientHandler(tracerProvider, propagators)),
+		)
 	}
 
 	return nil

@@ -19,7 +19,6 @@ package rpcplatform
 import (
 	"github.com/nexcode/rpcplatform/internal/balancer"
 	"github.com/nexcode/rpcplatform/internal/gears"
-	"github.com/nexcode/rpcplatform/internal/grpcinject"
 	"github.com/nexcode/rpcplatform/internal/resolver"
 	"google.golang.org/grpc"
 )
@@ -41,7 +40,7 @@ func (p *RPCPlatform) NewClient(target string, attributes *ClientAttributes) (*C
 		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"`+balancerName+`":{}}]}`),
 	)
 
-	if err := grpcinject.Injections(&options, p.config, nil); err != nil {
+	if err := p.grpcinject(nil); err != nil {
 		return nil, err
 	}
 

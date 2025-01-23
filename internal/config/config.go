@@ -26,7 +26,7 @@ type Config struct {
 	EtcdClient    *etcd.Client
 	EtcdPrefix    string
 	GRPCOptions   GRPCOptions
-	OpenTelemetry OpenTelemetryConfig
+	OpenTelemetry *OpenTelemetryConfig
 }
 
 type GRPCOptions struct {

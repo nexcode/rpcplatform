@@ -20,32 +20,29 @@ import (
 	"net"
 
 	"github.com/nexcode/rpcplatform/internal/gears"
-	"github.com/nexcode/rpcplatform/internal/grpcinject"
 	"google.golang.org/grpc"
 )
 
-// NewServer creates a new server. You need to provide the server name, address and attributes.
+// NewServer creates a new server. You need to provide the server name, listening address and attributes.
 // If no additional settings are needed, attributes can be nil.
 func (p *RPCPlatform) NewServer(name, addr string, attributes *ServerAttributes) (*Server, error) {
 	if attributes == nil {
 		attributes = Attributes().Server()
 	}
 
-	options := p.config.GRPCOptions.Server
-
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = grpcinject.Injections(&options, p.config, listener.Addr()); err != nil {
+	if err = p.grpcinject(listener.Addr()); err != nil {
 		return nil, err
 	}
 
 	return &Server{
 		name:       p.config.EtcdPrefix + gears.FixPath(name),
 		etcd:       p.config.EtcdClient,
-		server:     grpc.NewServer(options...),
+		server:     grpc.NewServer(p.config.GRPCOptions.Server...),
 		listener:   listener,
 		attributes: attributes,
 	}, nil
