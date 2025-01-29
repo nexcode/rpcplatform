@@ -24,8 +24,9 @@ import (
 )
 
 // NewServer creates a new server. You need to provide the server name, listening address and attributes.
+// Optional param `publicAddr` used if server can't reachable by listening address.
 // If no additional settings are needed, attributes can be nil.
-func (p *RPCPlatform) NewServer(name, addr string, attributes *ServerAttributes) (*Server, error) {
+func (p *RPCPlatform) NewServer(name, addr string, attributes *ServerAttributes, publicAddr ...string) (*Server, error) {
 	if attributes == nil {
 		attributes = Attributes().Server()
 	}
@@ -35,7 +36,13 @@ func (p *RPCPlatform) NewServer(name, addr string, attributes *ServerAttributes)
 		return nil, err
 	}
 
-	if err = p.grpcinject(listener.Addr()); err != nil {
+	if len(publicAddr) != 0 {
+		addr = publicAddr[0]
+	} else {
+		addr = listener.Addr().String()
+	}
+
+	if err = p.grpcinject(listener.Addr(), addr); err != nil {
 		return nil, err
 	}
 
@@ -45,5 +52,6 @@ func (p *RPCPlatform) NewServer(name, addr string, attributes *ServerAttributes)
 		server:     grpc.NewServer(p.config.GRPCOptions.Server...),
 		listener:   listener,
 		attributes: attributes,
+		publicAddr: addr,
 	}, nil
 }

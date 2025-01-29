@@ -53,7 +53,7 @@ func (s *Server) Serve() error {
 			}
 
 			ctx, cancel = context.WithTimeout(global, 4*time.Second)
-			_, err = s.etcd.Put(ctx, path, s.listener.Addr().String(), etcd.WithLease(lease.ID))
+			_, err = s.etcd.Put(ctx, path, s.publicAddr, etcd.WithLease(lease.ID))
 			cancel()
 
 			if err != nil {

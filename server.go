@@ -29,4 +29,5 @@ type Server struct {
 	server     *grpc.Server
 	listener   net.Listener
 	attributes *ServerAttributes
+	publicAddr string
 }

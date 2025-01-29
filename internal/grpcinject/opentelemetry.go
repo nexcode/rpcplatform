@@ -31,7 +31,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func OpenTelemetry(config *config.Config, addr net.Addr) error {
+func OpenTelemetry(config *config.Config, localAddr net.Addr, publicAddr string) error {
 	resOptions := []resource.Option{
 		resource.WithHost(),
 		resource.WithOS(),
@@ -40,8 +40,8 @@ func OpenTelemetry(config *config.Config, addr net.Addr) error {
 		resource.WithAttributes(semconv.ServiceName(config.OpenTelemetry.ServiceName)),
 	}
 
-	if addr != nil {
-		host, port, err := net.SplitHostPort(addr.String())
+	if localAddr != nil {
+		host, port, err := net.SplitHostPort(localAddr.String())
 		if err != nil {
 			return err
 		}
@@ -52,9 +52,26 @@ func OpenTelemetry(config *config.Config, addr net.Addr) error {
 		}
 
 		resOptions = append(resOptions,
-			resource.WithAttributes(semconv.NetworkTransportKey.String(addr.Network())),
+			resource.WithAttributes(semconv.NetworkTransportKey.String(localAddr.Network())),
 			resource.WithAttributes(semconv.NetworkLocalAddress(host)),
 			resource.WithAttributes(semconv.NetworkLocalPort(portInt)),
+		)
+
+		if publicAddr != localAddr.String() {
+			host, port, err = net.SplitHostPort(publicAddr)
+			if err != nil {
+				return err
+			}
+
+			portInt, err = strconv.Atoi(port)
+			if err != nil {
+				return err
+			}
+		}
+
+		resOptions = append(resOptions,
+			resource.WithAttributes(semconv.ServerAddress(host)),
+			resource.WithAttributes(semconv.ServerPort(portInt)),
 		)
 	}
 
@@ -83,7 +100,7 @@ func OpenTelemetry(config *config.Config, addr net.Addr) error {
 		propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}),
 	)
 
-	if addr != nil {
+	if localAddr != nil {
 		config.GRPCOptions.Server = append(config.GRPCOptions.Server,
 			grpc.StatsHandler(otelgrpc.NewServerHandler(tracerProvider, propagators)),
 		)
