@@ -20,33 +20,20 @@ import (
 	"context"
 	"strings"
 	"sync"
-	"time"
 
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
-func (c *Client) stateWatcher() error {
-	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
-	resp, err := c.etcd.Get(ctx, c.target, etcd.WithPrefix())
-	cancel()
-
-	if err != nil {
-		return err
-	}
-
-	serverInfo := make(map[string]string, len(resp.Kvs))
-	for _, kv := range resp.Kvs {
-		trimKey := strings.TrimPrefix(string(kv.Key), c.target)
-		serverInfo[trimKey] = string(kv.Value)
-	}
-
-	c.updateState(true, serverInfo)
-
+func (c *Client) stateWatcher(serverInfo map[string]string, revision int64) error {
 	watchChan := c.etcd.Watch(context.Background(), c.target,
-		etcd.WithPrefix(), etcd.WithRev(resp.Header.Revision+1),
+		etcd.WithPrefix(), etcd.WithRev(revision+1),
 	)
 
-	var wg sync.WaitGroup
+	var (
+		cancel = func() {}
+		ctx    context.Context
+		wg     sync.WaitGroup
+	)
 
 	go func() {
 		for data := range watchChan {

@@ -44,19 +44,23 @@ func (p *RPCPlatform) NewClient(target string, attributes *ClientAttributes) (*C
 		return nil, err
 	}
 
-	client, err := grpc.NewClient(target, options...)
-	if err != nil {
-		return nil, err
-	}
-
 	c := &Client{
 		target:   p.config.EtcdPrefix + gears.FixPath(target) + "/",
 		etcd:     p.config.EtcdClient,
 		resolver: resolver,
-		client:   client,
 	}
 
-	if err = c.stateWatcher(); err != nil {
+	serverInfo, revision, err := c.stateInit()
+	if err != nil {
+		return nil, err
+	}
+
+	c.client, err = grpc.NewClient(target, options...)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = c.stateWatcher(serverInfo, revision); err != nil {
 		return nil, err
 	}
 
