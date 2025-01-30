@@ -39,7 +39,7 @@ func (c *Client) stateWatcher() error {
 		serverInfo[trimKey] = string(kv.Value)
 	}
 
-	c.updateState(serverInfo)
+	c.updateState(true, serverInfo)
 
 	watchChan := c.etcd.Watch(context.Background(), c.target,
 		etcd.WithPrefix(), etcd.WithRev(resp.Header.Revision+1),
@@ -47,6 +47,8 @@ func (c *Client) stateWatcher() error {
 
 	go func() {
 		for data := range watchChan {
+			cancel()
+
 			for _, event := range data.Events {
 				trimKey := strings.TrimPrefix(string(event.Kv.Key), c.target)
 
@@ -58,7 +60,27 @@ func (c *Client) stateWatcher() error {
 				}
 			}
 
-			c.updateState(serverInfo)
+			connState, connOK := c.getConnState()
+			if connOK {
+				c.updateState(false, serverInfo)
+				continue
+			}
+
+			ctx, cancel = context.WithCancel(context.Background())
+
+			go func(ctx context.Context) {
+				for {
+					if !c.client.WaitForStateChange(ctx, connState) {
+						break
+					}
+
+					if connState, connOK = c.getConnState(); connOK {
+						cancel()
+						c.updateState(false, serverInfo)
+						break
+					}
+				}
+			}(ctx)
 		}
 	}()
 

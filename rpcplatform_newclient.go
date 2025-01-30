@@ -44,7 +44,7 @@ func (p *RPCPlatform) NewClient(target string, attributes *ClientAttributes) (*C
 		return nil, err
 	}
 
-	client, err := grpc.Dial(target, options...)
+	client, err := grpc.NewClient(target, options...)
 	if err != nil {
 		return nil, err
 	}

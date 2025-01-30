@@ -20,7 +20,7 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
-func (c *Client) updateState(serverInfo map[string]string) {
+func (c *Client) updateState(init bool, serverInfo map[string]string) {
 	tree := c.makeServerInfo(serverInfo)
 
 	state := resolver.State{
@@ -39,5 +39,9 @@ func (c *Client) updateState(serverInfo map[string]string) {
 		state.Addresses = append(state.Addresses, address)
 	}
 
-	c.resolver.UpdateState(state)
+	if init {
+		c.resolver.InitialState(state)
+	} else {
+		c.resolver.UpdateState(state)
+	}
 }
