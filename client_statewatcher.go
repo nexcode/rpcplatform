@@ -19,6 +19,7 @@ package rpcplatform
 import (
 	"context"
 	"strings"
+	"sync"
 	"time"
 
 	etcd "go.etcd.io/etcd/client/v3"
@@ -45,9 +46,12 @@ func (c *Client) stateWatcher() error {
 		etcd.WithPrefix(), etcd.WithRev(resp.Header.Revision+1),
 	)
 
+	var wg sync.WaitGroup
+
 	go func() {
 		for data := range watchChan {
 			cancel()
+			wg.Wait()
 
 			for _, event := range data.Events {
 				trimKey := strings.TrimPrefix(string(event.Kv.Key), c.target)
@@ -60,27 +64,31 @@ func (c *Client) stateWatcher() error {
 				}
 			}
 
-			connState, connOK := c.getConnState()
-			if connOK {
+			if c.resolver.CC != nil {
 				c.updateState(false, serverInfo)
 				continue
 			}
 
+			wg.Add(1)
 			ctx, cancel = context.WithCancel(context.Background())
 
-			go func(ctx context.Context) {
-				for {
-					if !c.client.WaitForStateChange(ctx, connState) {
-						break
-					}
+			go func() {
+				defer wg.Done()
 
-					if connState, connOK = c.getConnState(); connOK {
+				for {
+					connState := c.client.GetState()
+
+					if c.resolver.CC != nil {
 						cancel()
 						c.updateState(false, serverInfo)
 						break
 					}
+
+					if !c.client.WaitForStateChange(ctx, connState) {
+						break
+					}
 				}
-			}(ctx)
+			}()
 		}
 	}()
 
