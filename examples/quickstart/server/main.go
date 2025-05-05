@@ -29,14 +29,15 @@ type sumServer struct {
 	proto.UnimplementedSumServer
 }
 
-func (s *sumServer) Sum(_ context.Context, in *proto.SumRequest) (*proto.SumResponse, error) {
-	a := in.GetA()
-	b := in.GetB()
+func (s *sumServer) Sum(_ context.Context, request *proto.SumRequest) (*proto.SumResponse, error) {
+	a := request.GetA()
+	b := request.GetB()
+	sum := a + b
 
 	fmt.Println("request:", a, "+", b)
 
 	return &proto.SumResponse{
-		Sum: a + b,
+		Sum: &sum,
 	}, nil
 }
 

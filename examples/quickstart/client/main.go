@@ -61,8 +61,8 @@ func main() {
 		b := int64(rand.Intn(10))
 
 		resp, err := sumClient.Sum(context.Background(), &proto.SumRequest{
-			A: a,
-			B: b,
+			A: &a,
+			B: &b,
 		})
 
 		if err != nil {
