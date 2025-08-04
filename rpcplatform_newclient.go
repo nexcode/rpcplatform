@@ -33,16 +33,11 @@ func (p *RPCPlatform) NewClient(target string, attributes *ClientAttributes) (*C
 	balancerName := gears.UID()
 	balancer.Register(balancerName, attributes.maxActiveServers)
 
-	resolver := resolver.NewResolver()
-
-	options := append(p.config.GRPCOptions.Client,
-		grpc.WithResolvers(resolver),
-		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"`+balancerName+`":{}}]}`),
-	)
-
 	if err := p.grpcinject(gears.UID(), nil, ""); err != nil {
 		return nil, err
 	}
+
+	resolver := resolver.NewResolver()
 
 	c := &Client{
 		target:   p.config.EtcdPrefix + gears.FixPath(target) + "/",
@@ -54,6 +49,11 @@ func (p *RPCPlatform) NewClient(target string, attributes *ClientAttributes) (*C
 	if err != nil {
 		return nil, err
 	}
+
+	options := append(p.config.GRPCOptions.Client,
+		grpc.WithResolvers(resolver),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"`+balancerName+`":{}}]}`),
+	)
 
 	c.client, err = grpc.NewClient(target, options...)
 	if err != nil {
