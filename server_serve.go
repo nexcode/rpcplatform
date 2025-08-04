@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/nexcode/rpcplatform/internal/gears"
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
@@ -36,7 +35,7 @@ func (s *Server) Serve() error {
 	}()
 
 	go func() {
-		path := s.name + "/" + gears.UID()
+		path := s.name + "/" + s.id
 
 		for {
 			if !serving {

@@ -33,7 +33,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func OpenTelemetry(config *config.Config, localAddr net.Addr, publicAddr string) error {
+func OpenTelemetry(config *config.Config, instanceID string, localAddr net.Addr, publicAddr string) error {
 	resOptions := []resource.Option{
 		resource.WithHost(),
 		resource.WithOS(),
@@ -42,6 +42,7 @@ func OpenTelemetry(config *config.Config, localAddr net.Addr, publicAddr string)
 		resource.WithTelemetrySDK(),
 		resource.WithSchemaURL(semconv.SchemaURL),
 		resource.WithAttributes(semconv.ServiceName(config.OpenTelemetry.ServiceName)),
+		resource.WithAttributes(semconv.ServiceInstanceID(instanceID)),
 	}
 
 	if localAddr != nil {

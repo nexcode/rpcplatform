@@ -42,11 +42,14 @@ func (p *RPCPlatform) NewServer(name, addr string, attributes *ServerAttributes,
 		addr = listener.Addr().String()
 	}
 
-	if err = p.grpcinject(listener.Addr(), addr); err != nil {
+	id := gears.UID()
+
+	if err = p.grpcinject(id, listener.Addr(), addr); err != nil {
 		return nil, err
 	}
 
 	return &Server{
+		id:         id,
 		name:       p.config.EtcdPrefix + gears.FixPath(name),
 		etcd:       p.config.EtcdClient,
 		server:     grpc.NewServer(p.config.GRPCOptions.Server...),

@@ -22,9 +22,9 @@ import (
 	"github.com/nexcode/rpcplatform/internal/grpcinject"
 )
 
-func (p *RPCPlatform) grpcinject(localAddr net.Addr, publicAddr string) error {
+func (p *RPCPlatform) grpcinject(instanceID string, localAddr net.Addr, publicAddr string) error {
 	if p.config.OpenTelemetry != nil {
-		if err := grpcinject.OpenTelemetry(p.config, localAddr, publicAddr); err != nil {
+		if err := grpcinject.OpenTelemetry(p.config, instanceID, localAddr, publicAddr); err != nil {
 			return err
 		}
 	}

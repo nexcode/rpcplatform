@@ -24,6 +24,7 @@ import (
 )
 
 type Server struct {
+	id         string
 	name       string
 	etcd       *etcd.Client
 	server     *grpc.Server
