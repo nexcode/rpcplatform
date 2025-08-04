@@ -18,6 +18,8 @@ package grpcinject
 
 import (
 	"context"
+	"errors"
+	"log"
 	"net"
 	"strconv"
 	"time"
@@ -35,8 +37,10 @@ func OpenTelemetry(config *config.Config, localAddr net.Addr, publicAddr string)
 	resOptions := []resource.Option{
 		resource.WithHost(),
 		resource.WithOS(),
+		resource.WithContainer(),
 		resource.WithProcess(),
 		resource.WithTelemetrySDK(),
+		resource.WithSchemaURL(semconv.SchemaURL),
 		resource.WithAttributes(semconv.ServiceName(config.OpenTelemetry.ServiceName)),
 	}
 
@@ -79,7 +83,9 @@ func OpenTelemetry(config *config.Config, localAddr net.Addr, publicAddr string)
 	res, err := resource.New(ctx, resOptions...)
 	cancel()
 
-	if err != nil {
+	if errors.Is(err, resource.ErrPartialResource) || errors.Is(err, resource.ErrSchemaURLConflict) {
+		log.Println(err)
+	} else if err != nil {
 		return err
 	}
 
