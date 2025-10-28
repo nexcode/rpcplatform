@@ -40,14 +40,16 @@ func main() {
 	}
 
 	rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
-		options.ClientOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+		options.Platform.ClientOptions(
+			options.Client.GRPCOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+		),
 	)
 
 	if err != nil {
 		panic(err)
 	}
 
-	client, err := rpcp.NewClient("server", nil)
+	client, err := rpcp.NewClient("server")
 	if err != nil {
 		panic(err)
 	}

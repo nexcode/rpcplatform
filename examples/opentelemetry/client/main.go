@@ -56,15 +56,17 @@ func main() {
 	}
 
 	rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
-		options.ClientOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
-		options.OpenTelemetry("client", 1, otlpExporter, zipkinExporter),
+		options.Platform.ClientOptions(
+			options.Client.GRPCOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+		),
+		options.Platform.OpenTelemetry("client", 1, otlpExporter, zipkinExporter),
 	)
 
 	if err != nil {
 		panic(err)
 	}
 
-	client, err := rpcp.NewClient("server", nil)
+	client, err := rpcp.NewClient("server")
 	if err != nil {
 		panic(err)
 	}

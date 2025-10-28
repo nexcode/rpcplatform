@@ -27,5 +27,9 @@ func (pb *pickerBuilder) Build(pickerInfo base.PickerBuildInfo) balancer.Picker 
 	}
 
 	connInfoArr, totalWeight := pb.makeConnInfo(pickerInfo)
+	if totalWeight == 0 {
+		return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
+	}
+
 	return pb.makePicker(connInfoArr, totalWeight)
 }

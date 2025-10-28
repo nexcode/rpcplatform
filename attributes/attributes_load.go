@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
-package errors
+package attributes
 
-import "errors"
+import "strconv"
 
-var (
-	ErrGRPCOptionsExpected = errors.New("*[]grpc.DialOption or *[]grpc.ServerOption expected")
-)
+// Load used internally to load keys and values from strings.
+func (sa *Attributes) Load(key, value string) {
+	switch key {
+	case balancerPriority:
+		if v, err := strconv.Atoi(value); err == nil {
+			sa.BalancerPriority = v
+		}
+	case balancerWeight:
+		if v, err := strconv.Atoi(value); err == nil {
+			sa.BalancerWeight = v
+		}
+	}
+}

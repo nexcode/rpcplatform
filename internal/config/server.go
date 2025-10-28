@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,18 @@
 package config
 
 import (
-	etcd "go.etcd.io/etcd/client/v3"
-	"go.opentelemetry.io/otel/sdk/trace"
+	"github.com/nexcode/rpcplatform/attributes"
 	"google.golang.org/grpc"
 )
 
-type Config struct {
-	EtcdClient    *etcd.Client
-	EtcdPrefix    string
-	GRPCOptions   GRPCOptions
-	OpenTelemetry *OpenTelemetryConfig
+func NewServer() *Server {
+	return &Server{
+		Attributes: attributes.New(),
+	}
 }
 
-type GRPCOptions struct {
-	Client []grpc.DialOption
-	Server []grpc.ServerOption
-}
-
-type OpenTelemetryConfig struct {
-	ServiceName string
-	SampleRate  float64
-	Exporters   []trace.SpanExporter
+type Server struct {
+	PublicAddr  string
+	Attributes  *attributes.Attributes
+	GRPCOptions []grpc.ServerOption
 }

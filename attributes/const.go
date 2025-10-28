@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,9 @@
  * limitations under the License.
  */
 
-package rpcplatform
+package attributes
 
-import "strconv"
-
-func (a attributes) Server() *ServerAttributes {
-	return &ServerAttributes{
-		m: map[string]string{},
-	}
-}
-
-type ServerAttributes struct {
-	m map[string]string
-}
-
-func (sa *ServerAttributes) SetBalancerWeight(weight int) {
-	sa.m["balancerWeight"] = strconv.Itoa(weight)
-}
-
-func (sa *ServerAttributes) SetBalancerPriority(priority int) {
-	sa.m["balancerPriority"] = strconv.Itoa(priority)
-}
+const (
+	balancerPriority = "balancerPriority"
+	balancerWeight   = "balancerWeight"
+)

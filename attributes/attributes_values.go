@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package rpcplatform
+package attributes
 
-import (
-	"net"
+import "strconv"
 
-	"github.com/nexcode/rpcplatform/internal/grpcinject"
-)
-
-func (p *RPCPlatform) grpcinject(instanceID string, localAddr net.Addr, publicAddr string) error {
-	if p.config.OpenTelemetry != nil {
-		if err := grpcinject.OpenTelemetry(p.config, instanceID, localAddr, publicAddr); err != nil {
-			return err
-		}
+// Values used internally to create an string array of keys and values.
+func (sa *Attributes) Values() []string {
+	return []string{
+		balancerPriority, strconv.Itoa(sa.BalancerPriority),
+		balancerWeight, strconv.Itoa(sa.BalancerWeight),
 	}
-
-	return nil
 }

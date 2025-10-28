@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,24 @@
  * limitations under the License.
  */
 
-package rpcplatform
+package config
 
-func Attributes() attributes {
-	return attributes{}
+import (
+	"go.opentelemetry.io/otel/sdk/trace"
+)
+
+func NewPlatform() *Platform {
+	return &Platform{}
 }
 
-type attributes struct{}
+type Platform struct {
+	ClientOptions []func(*Client)
+	ServerOptions []func(*Server)
+	OpenTelemetry *OpenTelemetry
+}
+
+type OpenTelemetry struct {
+	ServiceName string
+	SampleRate  float64
+	Exporters   []trace.SpanExporter
+}

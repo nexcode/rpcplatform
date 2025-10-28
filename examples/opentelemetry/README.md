@@ -16,25 +16,25 @@ This example is very similar to [QuickStart](../quickstart), the main change is 
 
 ```go
 otlpExporter, err := otlptracegrpc.New(context.Background(),
-    otlptracegrpc.WithEndpoint("localhost:4317"),
-    otlptracegrpc.WithInsecure(),
+	otlptracegrpc.WithEndpoint("localhost:4317"),
+	otlptracegrpc.WithInsecure(),
 )
 
 if err != nil {
-    panic(err)
+	panic(err)
 }
 
 zipkinExporter, err := zipkin.New("http://localhost:9411/api/v2/spans")
 if err != nil {
-    panic(err)
+	panic(err)
 }
 
 rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
-    options.OpenTelemetry("ServiceName", 1, otlpExporter, zipkinExporter),
+	options.Platform.OpenTelemetry("server", 1, otlpExporter, zipkinExporter),
 )
 
 if err != nil {
-    panic(err)
+	panic(err)
 }
 ```
 

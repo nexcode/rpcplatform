@@ -27,18 +27,17 @@ import (
 // Serve starts the gRPC Server and return error if it occurs.
 func (s *Server) Serve() error {
 	global, cancel := context.WithCancel(context.Background())
-	serving := true
 
 	defer func() {
-		serving = false
 		cancel()
 	}()
 
 	go func() {
 		path := s.name + "/" + s.id
+		attributes := s.attributes.Values()
 
 		for {
-			if !serving {
+			if global.Err() != nil {
 				break
 			}
 
@@ -51,8 +50,15 @@ func (s *Server) Serve() error {
 				continue
 			}
 
+			ops := make([]etcd.Op, 0, len(attributes)/2+1)
+			ops = append(ops, etcd.OpPut(path, s.publicAddr, etcd.WithLease(lease.ID)))
+
+			for i := 0; i < len(attributes); i += 2 {
+				ops = append(ops, etcd.OpPut(path+"/"+attributes[i], attributes[i+1], etcd.WithLease(lease.ID)))
+			}
+
 			ctx, cancel = context.WithTimeout(global, 4*time.Second)
-			_, err = s.etcd.Put(ctx, path, s.publicAddr, etcd.WithLease(lease.ID))
+			resp, err := s.etcd.Txn(ctx).Then(ops...).Commit()
 			cancel()
 
 			if err != nil {
@@ -60,14 +66,8 @@ func (s *Server) Serve() error {
 				continue
 			}
 
-			for key, value := range s.attributes.m {
-				ctx, cancel = context.WithTimeout(global, 4*time.Second)
-				_, err = s.etcd.Put(ctx, path+"/"+key, value, etcd.WithLease(lease.ID))
-				cancel()
-
-				if err != nil {
-					fmt.Println(err)
-				}
+			if !resp.Succeeded {
+				continue
 			}
 
 			keepAlive, err := s.etcd.KeepAlive(global, lease.ID)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,9 @@
  * limitations under the License.
  */
 
-package options
+package rpcplatform
 
-import "github.com/nexcode/rpcplatform/internal/config"
-
-type Option interface {
-	apply(config *config.Config)
-}
-
-func newFuncOption(f func(*config.Config)) *funcOption {
-	return &funcOption{
-		f: f,
-	}
-}
-
-type funcOption struct {
-	f func(*config.Config)
-}
-
-func (fo *funcOption) apply(c *config.Config) {
-	fo.f(c)
+// ID return the server identifier.
+func (s *Server) ID() string {
+	return s.id
 }

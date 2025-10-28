@@ -40,17 +40,16 @@ func main() {
 	}
 
 	rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
-		options.ClientOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+		options.Platform.ClientOptions(
+			options.Client.GRPCOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+		),
 	)
 
 	if err != nil {
 		panic(err)
 	}
 
-	attributes := rpcplatform.Attributes().Client()
-	attributes.SetMaxActiveServers(2)
-
-	client, err := rpcp.NewClient("server", attributes)
+	client, err := rpcp.NewClient("server", options.Client.MaxActiveServers(2))
 	if err != nil {
 		panic(err)
 	}

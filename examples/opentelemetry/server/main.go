@@ -68,14 +68,14 @@ func main() {
 	}
 
 	rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
-		options.OpenTelemetry("server", 1, otlpExporter, zipkinExporter),
+		options.Platform.OpenTelemetry("server", 1, otlpExporter, zipkinExporter),
 	)
 
 	if err != nil {
 		panic(err)
 	}
 
-	server, err := rpcp.NewServer("server", "localhost:", nil)
+	server, err := rpcp.NewServer("server", "localhost:")
 	if err != nil {
 		panic(err)
 	}

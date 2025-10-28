@@ -19,6 +19,7 @@ package rpcplatform
 import (
 	"net"
 
+	"github.com/nexcode/rpcplatform/attributes"
 	etcd "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 )
@@ -29,6 +30,6 @@ type Server struct {
 	etcd       *etcd.Client
 	server     *grpc.Server
 	listener   net.Listener
-	attributes *ServerAttributes
+	attributes *attributes.Attributes
 	publicAddr string
 }

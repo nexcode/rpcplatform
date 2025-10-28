@@ -19,23 +19,33 @@ package rpcplatform
 import (
 	"github.com/nexcode/rpcplatform/internal/config"
 	"github.com/nexcode/rpcplatform/internal/gears"
-	"github.com/nexcode/rpcplatform/options"
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
 // New creates an RPCPlatform object for further creation of clients and servers.
 // All methods of this object are thread safe. You can create this object once
 // and use it in different places in your program.
-func New(etcdPrefix string, etcdClient *etcd.Client, opts ...options.Option) (*RPCPlatform, error) {
+func New(etcdPrefix string, etcdClient *etcd.Client, options ...func(*config.Platform)) (*RPCPlatform, error) {
 	if etcdPrefix != "" {
 		etcdPrefix = gears.FixPath(etcdPrefix)
 	}
 
-	return &RPCPlatform{
-		config: options.Make(etcdClient, etcdPrefix, opts),
-	}, nil
+	config := config.NewPlatform()
+	for _, option := range options {
+		option(config)
+	}
+
+	rpcp := &RPCPlatform{
+		etcdPrefix: etcdPrefix,
+		etcdClient: etcdClient,
+		config:     config,
+	}
+
+	return rpcp, nil
 }
 
 type RPCPlatform struct {
-	config *config.Config
+	etcdPrefix string
+	etcdClient *etcd.Client
+	config     *config.Platform
 }

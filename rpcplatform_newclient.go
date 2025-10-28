@@ -17,52 +17,78 @@
 package rpcplatform
 
 import (
+	"context"
+	"time"
+
 	"github.com/nexcode/rpcplatform/internal/balancer"
+	"github.com/nexcode/rpcplatform/internal/config"
 	"github.com/nexcode/rpcplatform/internal/gears"
 	"github.com/nexcode/rpcplatform/internal/resolver"
 	"google.golang.org/grpc"
 )
 
 // NewClient creates a new client. You need to provide the target server name.
-// If no additional settings are needed, attributes can be nil.
-func (p *RPCPlatform) NewClient(target string, attributes *ClientAttributes) (*Client, error) {
-	if attributes == nil {
-		attributes = Attributes().Client()
+func (p *RPCPlatform) NewClient(target string, options ...func(*config.Client)) (*Client, error) {
+	config := config.NewClient()
+
+	for _, option := range p.config.ClientOptions {
+		option(config)
+	}
+
+	for _, option := range options {
+		option(config)
 	}
 
 	balancerName := gears.UID()
-	balancer.Register(balancerName, attributes.maxActiveServers)
-
-	if err := p.grpcinject(gears.UID(), nil, ""); err != nil {
-		return nil, err
-	}
-
-	resolver := resolver.NewResolver()
+	balancer.Register(balancerName, config.MaxActiveServers)
 
 	c := &Client{
-		target:   p.config.EtcdPrefix + gears.FixPath(target) + "/",
-		etcd:     p.config.EtcdClient,
-		resolver: resolver,
+		target:   p.etcdPrefix + gears.FixPath(target) + "/",
+		resolver: resolver.NewResolver(),
 	}
 
-	serverInfo, revision, err := c.stateInit()
+	ctx, cancel := context.WithCancel(context.Background())
+
+	serverInfoTree, err := p.Lookup(ctx, target, true)
 	if err != nil {
 		return nil, err
 	}
 
-	options := append(p.config.GRPCOptions.Client,
-		grpc.WithResolvers(resolver),
+	select {
+	case serverInfoTree := <-serverInfoTree:
+		c.updateState(true, serverInfoTree)
+	case <-time.After(4 * time.Second):
+		cancel()
+	}
+
+	if err = ctx.Err(); err != nil {
+		return nil, err
+	}
+
+	config.GRPCOptions = append(config.GRPCOptions,
+		grpc.WithResolvers(c.resolver),
 		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"`+balancerName+`":{}}]}`),
 	)
 
-	c.client, err = grpc.NewClient(target, options...)
+	if p.config.OpenTelemetry != nil {
+		statsHandler, err := p.openTelemetry(gears.UID(), nil, "")
+		if err != nil {
+			return nil, err
+		}
+
+		config.GRPCOptions = append(config.GRPCOptions, grpc.WithStatsHandler(statsHandler))
+	}
+
+	c.client, err = grpc.NewClient(target, config.GRPCOptions...)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = c.stateWatcher(serverInfo, revision); err != nil {
-		return nil, err
-	}
+	go func() {
+		for serverInfoTree := range serverInfoTree {
+			c.updateState(false, serverInfoTree)
+		}
+	}()
 
 	return c, nil
 }

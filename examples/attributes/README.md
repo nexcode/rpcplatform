@@ -1,28 +1,25 @@
 ## Adding attributes
 
-This example is very similar to [QuickStart](../quickstart), but now we will use additional attributes for client and server.
+This example is very similar to [QuickStart](../quickstart), but now we will use additional attributes for server.
 
 For the client, we will set the maximum number of active servers (all other servers above this value will be backup servers):
 
 ```go
-attributes := rpcplatform.Attributes().Client()
-attributes.SetMaxActiveServers(2)
-
-client, err := rpcp.NewClient("server", attributes)
+client, err := rpcp.NewClient("server", options.Client.MaxActiveServers(2))
 if err != nil {
-    panic(err)
+	panic(err)
 }
 ```
 
-And for the server we will set the balancing weight:
+And for the server we will set the balancing weight attribute:
 
 ```go
-attributes := rpcplatform.Attributes().Server()
-attributes.SetBalancerWeight(4)
+attributes := attributes.New()
+attributes.BalancerWeight = 4
 
-server, err := rpcp.NewServer("server", "localhost:", attributes)
+server, err := rpcp.NewServer("server", "localhost:", options.Server.Attributes(attributes))
 if err != nil {
-    panic(err)
+	panic(err)
 }
 ```
 

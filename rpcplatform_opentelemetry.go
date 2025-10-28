@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package grpcinject
+package rpcplatform
 
 import (
 	"context"
@@ -24,16 +24,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/nexcode/rpcplatform/internal/config"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.34.0"
-	"google.golang.org/grpc"
+	"google.golang.org/grpc/stats"
 )
 
-func OpenTelemetry(config *config.Config, instanceID string, localAddr net.Addr, publicAddr string) error {
+func (p *RPCPlatform) openTelemetry(instanceID string, localAddr net.Addr, publicAddr string) (stats.Handler, error) {
 	resOptions := []resource.Option{
 		resource.WithHost(),
 		resource.WithOS(),
@@ -41,19 +40,19 @@ func OpenTelemetry(config *config.Config, instanceID string, localAddr net.Addr,
 		resource.WithProcess(),
 		resource.WithTelemetrySDK(),
 		resource.WithSchemaURL(semconv.SchemaURL),
-		resource.WithAttributes(semconv.ServiceName(config.OpenTelemetry.ServiceName)),
+		resource.WithAttributes(semconv.ServiceName(p.config.OpenTelemetry.ServiceName)),
 		resource.WithAttributes(semconv.ServiceInstanceID(instanceID)),
 	}
 
 	if localAddr != nil {
 		host, port, err := net.SplitHostPort(localAddr.String())
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		portInt, err := strconv.Atoi(port)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		resOptions = append(resOptions,
@@ -65,12 +64,12 @@ func OpenTelemetry(config *config.Config, instanceID string, localAddr net.Addr,
 		if publicAddr != localAddr.String() {
 			host, port, err = net.SplitHostPort(publicAddr)
 			if err != nil {
-				return err
+				return nil, err
 			}
 
 			portInt, err = strconv.Atoi(port)
 			if err != nil {
-				return err
+				return nil, err
 			}
 		}
 
@@ -87,15 +86,15 @@ func OpenTelemetry(config *config.Config, instanceID string, localAddr net.Addr,
 	if errors.Is(err, resource.ErrPartialResource) || errors.Is(err, resource.ErrSchemaURLConflict) {
 		log.Println(err)
 	} else if err != nil {
-		return err
+		return nil, err
 	}
 
 	tpOptions := []trace.TracerProviderOption{
-		trace.WithSampler(trace.ParentBased(trace.TraceIDRatioBased(config.OpenTelemetry.SampleRate))),
+		trace.WithSampler(trace.ParentBased(trace.TraceIDRatioBased(p.config.OpenTelemetry.SampleRate))),
 		trace.WithResource(res),
 	}
 
-	for _, exporter := range config.OpenTelemetry.Exporters {
+	for _, exporter := range p.config.OpenTelemetry.Exporters {
 		tpOptions = append(tpOptions, trace.WithBatcher(exporter))
 	}
 
@@ -108,14 +107,8 @@ func OpenTelemetry(config *config.Config, instanceID string, localAddr net.Addr,
 	)
 
 	if localAddr != nil {
-		config.GRPCOptions.Server = append(config.GRPCOptions.Server,
-			grpc.StatsHandler(otelgrpc.NewServerHandler(tracerProvider, propagators)),
-		)
-	} else {
-		config.GRPCOptions.Client = append(config.GRPCOptions.Client,
-			grpc.WithStatsHandler(otelgrpc.NewClientHandler(tracerProvider, propagators)),
-		)
+		return otelgrpc.NewServerHandler(tracerProvider, propagators), nil
 	}
 
-	return nil
+	return otelgrpc.NewClientHandler(tracerProvider, propagators), nil
 }

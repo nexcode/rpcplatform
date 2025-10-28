@@ -19,16 +19,26 @@ package rpcplatform
 import (
 	"net"
 
+	"github.com/nexcode/rpcplatform/attributes"
+	"github.com/nexcode/rpcplatform/internal/config"
 	"github.com/nexcode/rpcplatform/internal/gears"
 	"google.golang.org/grpc"
 )
 
-// NewServer creates a new server. You need to provide the server name, listening address and attributes.
-// Optional param `publicAddr` used if server can't reachable by listening address.
-// If no additional settings are needed, attributes can be nil.
-func (p *RPCPlatform) NewServer(name, addr string, attributes *ServerAttributes, publicAddr ...string) (*Server, error) {
-	if attributes == nil {
-		attributes = Attributes().Server()
+// NewServer creates a new server. You need to provide the server name and listening address.
+func (p *RPCPlatform) NewServer(name, addr string, options ...func(*config.Server)) (*Server, error) {
+	config := config.NewServer()
+
+	for _, option := range p.config.ServerOptions {
+		option(config)
+	}
+
+	for _, option := range options {
+		option(config)
+	}
+
+	if config.Attributes == nil {
+		config.Attributes = attributes.New()
 	}
 
 	listener, err := net.Listen("tcp", addr)
@@ -36,25 +46,30 @@ func (p *RPCPlatform) NewServer(name, addr string, attributes *ServerAttributes,
 		return nil, err
 	}
 
-	if len(publicAddr) != 0 {
-		addr = publicAddr[0]
+	if config.PublicAddr != "" {
+		addr = config.PublicAddr
 	} else {
 		addr = listener.Addr().String()
 	}
 
 	id := gears.UID()
 
-	if err = p.grpcinject(id, listener.Addr(), addr); err != nil {
-		return nil, err
+	if p.config.OpenTelemetry != nil {
+		statsHandler, err := p.openTelemetry(id, listener.Addr(), addr)
+		if err != nil {
+			return nil, err
+		}
+
+		config.GRPCOptions = append(config.GRPCOptions, grpc.StatsHandler(statsHandler))
 	}
 
 	return &Server{
 		id:         id,
-		name:       p.config.EtcdPrefix + gears.FixPath(name),
-		etcd:       p.config.EtcdClient,
-		server:     grpc.NewServer(p.config.GRPCOptions.Server...),
+		name:       p.etcdPrefix + gears.FixPath(name),
+		etcd:       p.etcdClient,
+		server:     grpc.NewServer(config.GRPCOptions...),
 		listener:   listener,
-		attributes: attributes,
+		attributes: config.Attributes,
 		publicAddr: addr,
 	}, nil
 }

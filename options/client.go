@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,28 +18,25 @@ package options
 
 import (
 	"github.com/nexcode/rpcplatform/internal/config"
-	"go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc"
 )
 
-func ClientOptions(options ...grpc.DialOption) Option {
-	return newFuncOption(func(c *config.Config) {
-		c.GRPCOptions.Client = options
-	})
+// Client provides options used when creating new client.
+var Client = client{}
+
+type client struct{}
+
+// MaxActiveServers sets the maximum number of active servers the client will connect to.
+// If there are more servers than this value, no requests will be made to them.
+func (client) MaxActiveServers(count int) func(*config.Client) {
+	return func(c *config.Client) {
+		c.MaxActiveServers = count
+	}
 }
 
-func ServerOptions(options ...grpc.ServerOption) Option {
-	return newFuncOption(func(c *config.Config) {
-		c.GRPCOptions.Server = options
-	})
-}
-
-func OpenTelemetry(serviceName string, sampleRate float64, exporters ...trace.SpanExporter) Option {
-	return newFuncOption(func(c *config.Config) {
-		c.OpenTelemetry = &config.OpenTelemetryConfig{
-			ServiceName: serviceName,
-			SampleRate:  sampleRate,
-			Exporters:   exporters,
-		}
-	})
+// GRPCOptions provide []grpc.DialOption to the client.
+func (client) GRPCOptions(options ...grpc.DialOption) func(*config.Client) {
+	return func(c *config.Client) {
+		c.GRPCOptions = append(c.GRPCOptions, options...)
+	}
 }

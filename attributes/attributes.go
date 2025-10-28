@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package options
+package attributes
 
-import (
-	"github.com/nexcode/rpcplatform/internal/config"
-	etcd "go.etcd.io/etcd/client/v3"
-)
-
-func Make(etcdClient *etcd.Client, etcdPrefix string, options []Option) *config.Config {
-	config := &config.Config{
-		EtcdClient: etcdClient,
-		EtcdPrefix: etcdPrefix,
+// New returns attributes with default values.
+func New() *Attributes {
+	return &Attributes{
+		BalancerWeight: 1,
 	}
+}
 
-	for _, option := range options {
-		option.apply(config)
-	}
-
-	return config
+// Attributes provides server attribute values.
+type Attributes struct {
+	BalancerPriority int
+	BalancerWeight   int
 }

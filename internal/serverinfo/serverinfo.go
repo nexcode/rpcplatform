@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package rpcplatform
+package serverinfo
 
-func (a attributes) Client() *ClientAttributes {
-	return &ClientAttributes{}
-}
+import (
+	"github.com/nexcode/rpcplatform/attributes"
+)
 
-type ClientAttributes struct {
-	maxActiveServers int
-}
-
-func (ca *ClientAttributes) SetMaxActiveServers(count int) {
-	ca.maxActiveServers = count
+type ServerInfo struct {
+	Address    string
+	Attributes *attributes.Attributes
 }

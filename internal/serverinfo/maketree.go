@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,35 +14,32 @@
  * limitations under the License.
  */
 
-package rpcplatform
+package serverinfo
 
 import (
 	"strings"
+
+	"github.com/nexcode/rpcplatform/attributes"
 )
 
-type addrAndAttrs struct {
-	address    string
-	attributes map[string]string
-}
+func MakeTree(m map[string]string) map[string]*ServerInfo {
+	serverInfoTree := map[string]*ServerInfo{}
 
-func (c *Client) makeServerInfo(serverInfo map[string]string) map[string]*addrAndAttrs {
-	tree := map[string]*addrAndAttrs{}
-
-	for key, value := range serverInfo {
+	for key, value := range m {
 		path := strings.SplitN(key, "/", 2)
 
-		if tree[path[0]] == nil {
-			tree[path[0]] = &addrAndAttrs{
-				attributes: map[string]string{},
+		if serverInfoTree[path[0]] == nil {
+			serverInfoTree[path[0]] = &ServerInfo{
+				Attributes: attributes.New(),
 			}
 		}
 
 		if len(path) == 1 {
-			tree[path[0]].address = value
+			serverInfoTree[path[0]].Address = value
 		} else {
-			tree[path[0]].attributes[path[1]] = value
+			serverInfoTree[path[0]].Attributes.Load(path[1], value)
 		}
 	}
 
-	return tree
+	return serverInfoTree
 }

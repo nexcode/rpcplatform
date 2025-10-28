@@ -14,31 +14,17 @@
  * limitations under the License.
  */
 
-package rpcplatform
+package config
 
 import (
-	"context"
-	"strings"
-	"time"
-
-	etcd "go.etcd.io/etcd/client/v3"
+	"google.golang.org/grpc"
 )
 
-func (c *Client) stateInit() (map[string]string, int64, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
-	resp, err := c.etcd.Get(ctx, c.target, etcd.WithPrefix())
-	cancel()
+func NewClient() *Client {
+	return &Client{}
+}
 
-	if err != nil {
-		return nil, 0, err
-	}
-
-	serverInfo := make(map[string]string, len(resp.Kvs))
-	for _, kv := range resp.Kvs {
-		trimKey := strings.TrimPrefix(string(kv.Key), c.target)
-		serverInfo[trimKey] = string(kv.Value)
-	}
-
-	c.updateState(true, serverInfo)
-	return serverInfo, resp.Header.Revision, nil
+type Client struct {
+	MaxActiveServers int
+	GRPCOptions      []grpc.DialOption
 }

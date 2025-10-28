@@ -20,8 +20,8 @@ import (
 	"cmp"
 	"math"
 	"slices"
-	"strconv"
 
+	"github.com/nexcode/rpcplatform/attributes"
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
 )
@@ -39,21 +39,17 @@ func (pb *pickerBuilder) makeConnInfo(pickerInfo base.PickerBuildInfo) ([]*connI
 	var totalWeight int
 
 	for subConn, subConnInfo := range pickerInfo.ReadySCs {
-		connInfo := connInfo{
-			subConn: subConn,
+		attributes := subConnInfo.Address.Attributes.Value(struct{}{}).(*attributes.Attributes)
+
+		if attributes.BalancerWeight <= 0 {
+			continue
 		}
 
-		priority, _ := subConnInfo.Address.Attributes.Value("balancerPriority").(string)
-		connInfo.priority, _ = strconv.Atoi(priority)
-
-		weight, _ := subConnInfo.Address.Attributes.Value("balancerWeight").(string)
-		connInfo.weight, _ = strconv.Atoi(weight)
-
-		if connInfo.weight <= 0 {
-			connInfo.weight = 1
-		}
-
-		connInfoArr = append(connInfoArr, &connInfo)
+		connInfoArr = append(connInfoArr, &connInfo{
+			subConn:  subConn,
+			priority: attributes.BalancerPriority,
+			weight:   attributes.BalancerWeight,
+		})
 	}
 
 	slices.SortFunc(connInfoArr, func(a, b *connInfo) int {
