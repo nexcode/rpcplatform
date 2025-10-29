@@ -11,10 +11,18 @@ services and other useful things. [gRPC](https://grpc.io) is used for communicat
 ## etcd required
 
 If there is no etcd in your infrastructure, you can install it from a
-[docker container](https://hub.docker.com/r/bitnami/etcd) for tests:
+[docker container](https://etcd.io/docs/v3.6/op-guide/container/) for tests:
 
 ```shell
-docker run -d --name etcd --env=ALLOW_NONE_AUTHENTICATION=yes -p 2379:2379 -p 2380:2380 bitnami/etcd
+docker run -d \
+  -p 2379:2379 \
+  -p 2380:2380 \
+  --name etcd gcr.io/etcd-development/etcd:v3.6.5 \
+  /usr/local/bin/etcd \
+  --name etcd \
+  --initial-advertise-peer-urls http://127.0.0.1:2380 --listen-peer-urls http://0.0.0.0:2380 \
+  --advertise-client-urls http://127.0.0.1:2379 --listen-client-urls http://0.0.0.0:2379 \
+  --initial-cluster etcd=http://127.0.0.1:2380
 ```
 
 Of course, you can use docker in production or install etcd using your favorite package manager.
