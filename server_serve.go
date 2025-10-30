@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/nexcode/rpcplatform/internal/attributes"
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
@@ -34,7 +35,7 @@ func (s *Server) Serve() error {
 
 	go func() {
 		path := s.name + "/" + s.id
-		attributes := s.attributes.Values()
+		attributes := attributes.Values(s.attributes)
 
 		for {
 			if global.Err() != nil {

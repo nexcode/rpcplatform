@@ -21,14 +21,13 @@ import (
 	"strings"
 
 	"github.com/nexcode/rpcplatform/internal/gears"
-	"github.com/nexcode/rpcplatform/internal/serverinfo"
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
 // Lookup returns information about available servers by name. If the watch is set to true, a new portion of data
 // will be provided with each change. Otherwise the channel will be closed immediately after the first data is written.
 // The keys of the returned map are server IDs.
-func (p *RPCPlatform) Lookup(ctx context.Context, name string, watch bool) (<-chan map[string]*serverinfo.ServerInfo, error) {
+func (p *RPCPlatform) Lookup(ctx context.Context, name string, watch bool) (<-chan map[string]*ServerInfo, error) {
 	target := p.etcdPrefix + gears.FixPath(name) + "/"
 
 	resp, err := p.etcdClient.Get(ctx, target, etcd.WithPrefix())
@@ -42,8 +41,8 @@ func (p *RPCPlatform) Lookup(ctx context.Context, name string, watch bool) (<-ch
 		serverInfoFlat[trimKey] = string(kv.Value)
 	}
 
-	serverInfoTree := make(chan map[string]*serverinfo.ServerInfo, 1)
-	serverInfoTree <- serverinfo.MakeTree(serverInfoFlat)
+	serverInfoTree := make(chan map[string]*ServerInfo, 1)
+	serverInfoTree <- makeServerInfo(serverInfoFlat)
 
 	if !watch {
 		close(serverInfoTree)
@@ -67,7 +66,7 @@ func (p *RPCPlatform) Lookup(ctx context.Context, name string, watch bool) (<-ch
 				}
 			}
 
-			serverInfoTree <- serverinfo.MakeTree(serverInfoFlat)
+			serverInfoTree <- makeServerInfo(serverInfoFlat)
 		}
 
 		close(serverInfoTree)

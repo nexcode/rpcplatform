@@ -21,27 +21,24 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
-// Platform provides options used when creating new RPCPlatform.
-var Platform = platform{}
-
-type platform struct{}
+type Platform struct{}
 
 // ClientOptions sets global settings for new clients that can be overwritten by local settings for each client.
-func (platform) ClientOptions(options ...func(*config.Client)) func(*config.Platform) {
+func (Platform) ClientOptions(options ...func(*config.Client)) func(*config.Platform) {
 	return func(c *config.Platform) {
 		c.ClientOptions = append(c.ClientOptions, options...)
 	}
 }
 
 // ServerOptions sets global settings for new servers that can be overwritten by local settings for each server.
-func (platform) ServerOptions(options ...func(*config.Server)) func(*config.Platform) {
+func (Platform) ServerOptions(options ...func(*config.Server)) func(*config.Platform) {
 	return func(c *config.Platform) {
 		c.ServerOptions = append(c.ServerOptions, options...)
 	}
 }
 
 // OpenTelemetry configures OpenTelemetry settings for clients and servers.
-func (platform) OpenTelemetry(serviceName string, sampleRate float64, exporters ...trace.SpanExporter) func(*config.Platform) {
+func (Platform) OpenTelemetry(serviceName string, sampleRate float64, exporters ...trace.SpanExporter) func(*config.Platform) {
 	return func(c *config.Platform) {
 		c.OpenTelemetry = &config.OpenTelemetry{
 			ServiceName: serviceName,

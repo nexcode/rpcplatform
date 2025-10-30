@@ -21,7 +21,7 @@ import (
 	"math"
 	"slices"
 
-	"github.com/nexcode/rpcplatform/attributes"
+	"github.com/nexcode/rpcplatform/internal/attributes"
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
 )

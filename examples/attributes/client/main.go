@@ -24,7 +24,6 @@ import (
 
 	"github.com/nexcode/rpcplatform"
 	"github.com/nexcode/rpcplatform/examples/quickstart/proto"
-	"github.com/nexcode/rpcplatform/options"
 	etcd "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -40,8 +39,8 @@ func main() {
 	}
 
 	rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
-		options.Platform.ClientOptions(
-			options.Client.GRPCOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+		rpcplatform.PlatformOptions.ClientOptions(
+			rpcplatform.ClientOptions.GRPCOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
 		),
 	)
 
@@ -49,7 +48,7 @@ func main() {
 		panic(err)
 	}
 
-	client, err := rpcp.NewClient("server", options.Client.MaxActiveServers(2))
+	client, err := rpcp.NewClient("server", rpcplatform.ClientOptions.MaxActiveServers(2))
 	if err != nil {
 		panic(err)
 	}

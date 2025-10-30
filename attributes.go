@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package attributes
+package rpcplatform
 
-import "strconv"
+import (
+	"github.com/nexcode/rpcplatform/internal/attributes"
+)
 
-// Values used internally to create an string array of keys and values.
-func (sa *Attributes) Values() []string {
-	return []string{
-		balancerPriority, strconv.Itoa(sa.BalancerPriority),
-		balancerWeight, strconv.Itoa(sa.BalancerWeight),
-	}
+// NewAttributes returns attributes with default values.
+func NewAttributes() *Attributes {
+	return attributes.New()
 }
+
+// Attributes provides server attribute values.
+type Attributes = attributes.Attributes

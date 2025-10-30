@@ -21,22 +21,26 @@ import (
 	"google.golang.org/grpc"
 )
 
-// Client provides options used when creating new client.
-var Client = client{}
-
-type client struct{}
+type Client struct{}
 
 // MaxActiveServers sets the maximum number of active servers the client will connect to.
 // If there are more servers than this value, no requests will be made to them.
-func (client) MaxActiveServers(count int) func(*config.Client) {
+func (Client) MaxActiveServers(count int) func(*config.Client) {
 	return func(c *config.Client) {
 		c.MaxActiveServers = count
 	}
 }
 
 // GRPCOptions provide []grpc.DialOption to the client.
-func (client) GRPCOptions(options ...grpc.DialOption) func(*config.Client) {
+func (Client) GRPCOptions(options ...grpc.DialOption) func(*config.Client) {
 	return func(c *config.Client) {
 		c.GRPCOptions = append(c.GRPCOptions, options...)
 	}
 }
+
+// var Client ClientOption = client{}
+
+// type ClientOption interface {
+// 	MaxActiveServers(count int) func(*config.Client)
+// 	GRPCOptions(options ...grpc.DialOption) func(*config.Client)
+// }

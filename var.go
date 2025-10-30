@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package serverinfo
+package rpcplatform
 
 import (
-	"github.com/nexcode/rpcplatform/attributes"
+	"github.com/nexcode/rpcplatform/internal/options"
 )
 
-type ServerInfo struct {
-	Address    string
-	Attributes *attributes.Attributes
-}
+var (
+	// PlatformOptions provides options used when creating new RPCPlatform.
+	PlatformOptions = options.Platform{}
+
+	// ClientOptions provides options used when creating new Client.
+	ClientOptions = options.Client{}
+
+	// ServerOptions provides options used when creating new Server.
+	ServerOptions = options.Server{}
+)

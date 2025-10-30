@@ -21,9 +21,7 @@ import (
 	"fmt"
 
 	"github.com/nexcode/rpcplatform"
-	"github.com/nexcode/rpcplatform/attributes"
 	"github.com/nexcode/rpcplatform/examples/quickstart/proto"
-	"github.com/nexcode/rpcplatform/options"
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
@@ -57,10 +55,10 @@ func main() {
 		panic(err)
 	}
 
-	attributes := attributes.New()
+	attributes := rpcplatform.NewAttributes()
 	attributes.BalancerWeight = 4
 
-	server, err := rpcp.NewServer("server", "localhost:", options.Server.Attributes(attributes))
+	server, err := rpcp.NewServer("server", "localhost:", rpcplatform.ServerOptions.Attributes(attributes))
 	if err != nil {
 		panic(err)
 	}

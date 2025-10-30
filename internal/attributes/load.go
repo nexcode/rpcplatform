@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package rpcplatform
+package attributes
 
-import (
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/resolver/manual"
-)
+import "strconv"
 
-type Client struct {
-	id       string
-	target   string
-	client   *grpc.ClientConn
-	resolver *manual.Resolver
+func Load(attrs *Attributes, key, value string) {
+	switch key {
+	case balancerPriority:
+		if v, err := strconv.Atoi(value); err == nil {
+			attrs.BalancerPriority = v
+		}
+	case balancerWeight:
+		if v, err := strconv.Atoi(value); err == nil {
+			attrs.BalancerWeight = v
+		}
+	}
 }

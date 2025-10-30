@@ -28,7 +28,7 @@ import (
 )
 
 // NewClient creates a new client. You need to provide the target server name.
-func (p *RPCPlatform) NewClient(target string, options ...func(*config.Client)) (*Client, error) {
+func (p *RPCPlatform) NewClient(target string, options ...ClientOption) (*Client, error) {
 	config := config.NewClient()
 
 	for _, option := range p.config.ClientOptions {
@@ -43,6 +43,7 @@ func (p *RPCPlatform) NewClient(target string, options ...func(*config.Client)) 
 	balancer.Register(balancerName, config.MaxActiveServers)
 
 	c := &Client{
+		id:       gears.UID(),
 		target:   p.etcdPrefix + gears.FixPath(target) + "/",
 		resolver: resolver.NewResolver(),
 	}
@@ -71,7 +72,7 @@ func (p *RPCPlatform) NewClient(target string, options ...func(*config.Client)) 
 	)
 
 	if p.config.OpenTelemetry != nil {
-		statsHandler, err := p.openTelemetry(gears.UID(), nil, "")
+		statsHandler, err := p.openTelemetry(c.id, nil, "")
 		if err != nil {
 			return nil, err
 		}

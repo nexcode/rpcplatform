@@ -14,21 +14,38 @@
  * limitations under the License.
  */
 
-package config
+package rpcplatform
 
 import (
+	"strings"
+
 	"github.com/nexcode/rpcplatform/internal/attributes"
-	"google.golang.org/grpc"
 )
 
-func NewServer() *Server {
-	return &Server{
-		Attributes: attributes.New(),
-	}
+// ServerInfo is the state of the server in etcd.
+type ServerInfo struct {
+	Address    string
+	Attributes *Attributes
 }
 
-type Server struct {
-	PublicAddr  string
-	Attributes  *attributes.Attributes
-	GRPCOptions []grpc.ServerOption
+func makeServerInfo(m map[string]string) map[string]*ServerInfo {
+	serverInfoTree := map[string]*ServerInfo{}
+
+	for key, value := range m {
+		path := strings.SplitN(key, "/", 2)
+
+		if serverInfoTree[path[0]] == nil {
+			serverInfoTree[path[0]] = &ServerInfo{
+				Attributes: NewAttributes(),
+			}
+		}
+
+		if len(path) == 1 {
+			serverInfoTree[path[0]].Address = value
+		} else {
+			attributes.Load(serverInfoTree[path[0]].Attributes, path[1], value)
+		}
+	}
+
+	return serverInfoTree
 }

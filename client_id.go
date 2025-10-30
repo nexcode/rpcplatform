@@ -14,32 +14,9 @@
  * limitations under the License.
  */
 
-package serverinfo
+package rpcplatform
 
-import (
-	"strings"
-
-	"github.com/nexcode/rpcplatform/attributes"
-)
-
-func MakeTree(m map[string]string) map[string]*ServerInfo {
-	serverInfoTree := map[string]*ServerInfo{}
-
-	for key, value := range m {
-		path := strings.SplitN(key, "/", 2)
-
-		if serverInfoTree[path[0]] == nil {
-			serverInfoTree[path[0]] = &ServerInfo{
-				Attributes: attributes.New(),
-			}
-		}
-
-		if len(path) == 1 {
-			serverInfoTree[path[0]].Address = value
-		} else {
-			serverInfoTree[path[0]].Attributes.Load(path[1], value)
-		}
-	}
-
-	return serverInfoTree
+// ID return the client identifier.
+func (c *Client) ID() string {
+	return c.id
 }

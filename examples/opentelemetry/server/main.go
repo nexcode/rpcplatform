@@ -22,7 +22,6 @@ import (
 
 	"github.com/nexcode/rpcplatform"
 	"github.com/nexcode/rpcplatform/examples/quickstart/proto"
-	"github.com/nexcode/rpcplatform/options"
 	etcd "go.etcd.io/etcd/client/v3"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/zipkin"
@@ -68,7 +67,7 @@ func main() {
 	}
 
 	rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
-		options.Platform.OpenTelemetry("server", 1, otlpExporter, zipkinExporter),
+		rpcplatform.PlatformOptions.OpenTelemetry("server", 1, otlpExporter, zipkinExporter),
 	)
 
 	if err != nil {

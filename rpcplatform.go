@@ -25,7 +25,7 @@ import (
 // New creates an RPCPlatform object for further creation of clients and servers.
 // All methods of this object are thread safe. You can create this object once
 // and use it in different places in your program.
-func New(etcdPrefix string, etcdClient *etcd.Client, options ...func(*config.Platform)) (*RPCPlatform, error) {
+func New(etcdPrefix string, etcdClient *etcd.Client, options ...PlatformOption) (*RPCPlatform, error) {
 	if etcdPrefix != "" {
 		etcdPrefix = gears.FixPath(etcdPrefix)
 	}

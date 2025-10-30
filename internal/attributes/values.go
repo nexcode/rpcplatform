@@ -18,16 +18,9 @@ package attributes
 
 import "strconv"
 
-// Load used internally to load keys and values from strings.
-func (sa *Attributes) Load(key, value string) {
-	switch key {
-	case balancerPriority:
-		if v, err := strconv.Atoi(value); err == nil {
-			sa.BalancerPriority = v
-		}
-	case balancerWeight:
-		if v, err := strconv.Atoi(value); err == nil {
-			sa.BalancerWeight = v
-		}
+func Values(attrs *Attributes) []string {
+	return []string{
+		balancerPriority, strconv.Itoa(attrs.BalancerPriority),
+		balancerWeight, strconv.Itoa(attrs.BalancerWeight),
 	}
 }

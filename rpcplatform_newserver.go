@@ -19,14 +19,13 @@ package rpcplatform
 import (
 	"net"
 
-	"github.com/nexcode/rpcplatform/attributes"
 	"github.com/nexcode/rpcplatform/internal/config"
 	"github.com/nexcode/rpcplatform/internal/gears"
 	"google.golang.org/grpc"
 )
 
 // NewServer creates a new server. You need to provide the server name and listening address.
-func (p *RPCPlatform) NewServer(name, addr string, options ...func(*config.Server)) (*Server, error) {
+func (p *RPCPlatform) NewServer(name, addr string, options ...ServerOption) (*Server, error) {
 	config := config.NewServer()
 
 	for _, option := range p.config.ServerOptions {
@@ -38,7 +37,7 @@ func (p *RPCPlatform) NewServer(name, addr string, options ...func(*config.Serve
 	}
 
 	if config.Attributes == nil {
-		config.Attributes = attributes.New()
+		config.Attributes = NewAttributes()
 	}
 
 	listener, err := net.Listen("tcp", addr)

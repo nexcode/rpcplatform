@@ -17,12 +17,11 @@
 package rpcplatform
 
 import (
-	"github.com/nexcode/rpcplatform/internal/serverinfo"
 	"google.golang.org/grpc/attributes"
 	"google.golang.org/grpc/resolver"
 )
 
-func (c *Client) updateState(init bool, serverInfoTree map[string]*serverinfo.ServerInfo) {
+func (c *Client) updateState(init bool, serverInfoTree map[string]*ServerInfo) {
 	state := resolver.State{
 		Addresses: make([]resolver.Address, 0, len(serverInfoTree)),
 	}

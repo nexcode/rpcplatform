@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package attributes
+package rpcplatform
 
-// New returns attributes with default values.
-func New() *Attributes {
-	return &Attributes{
-		BalancerWeight: 1,
-	}
-}
+import (
+	"github.com/nexcode/rpcplatform/internal/config"
+)
 
-// Attributes provides server attribute values.
-type Attributes struct {
-	BalancerPriority int
-	BalancerWeight   int
-}
+// PlatformOption is used to pass [PlatformOptions] when creating a new [RPCPlatform]
+type PlatformOption = func(*config.Platform)
+
+// ClientOption is used to pass [ClientOptions] when creating a new [Client]
+type ClientOption = func(*config.Client)
+
+// ServerOption is used to pass [ServerOptions] when creating a new [Server]
+type ServerOption = func(*config.Server)

@@ -24,7 +24,6 @@ import (
 
 	"github.com/nexcode/rpcplatform"
 	"github.com/nexcode/rpcplatform/examples/quickstart/proto"
-	"github.com/nexcode/rpcplatform/options"
 	etcd "go.etcd.io/etcd/client/v3"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/zipkin"
@@ -56,10 +55,10 @@ func main() {
 	}
 
 	rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
-		options.Platform.ClientOptions(
-			options.Client.GRPCOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+		rpcplatform.PlatformOptions.ClientOptions(
+			rpcplatform.ClientOptions.GRPCOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
 		),
-		options.Platform.OpenTelemetry("client", 1, otlpExporter, zipkinExporter),
+		rpcplatform.PlatformOptions.OpenTelemetry("client", 1, otlpExporter, zipkinExporter),
 	)
 
 	if err != nil {

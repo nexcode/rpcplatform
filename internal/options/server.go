@@ -17,32 +17,29 @@
 package options
 
 import (
-	"github.com/nexcode/rpcplatform/attributes"
+	"github.com/nexcode/rpcplatform/internal/attributes"
 	"github.com/nexcode/rpcplatform/internal/config"
 	"google.golang.org/grpc"
 )
 
-// Server provides options used when creating new server.
-var Server = server{}
-
-type server struct{}
+type Server struct{}
 
 // PublicAddr is used when the server is not accessible to clients at the address it is located at.
-func (server) PublicAddr(publicAddr string) func(*config.Server) {
+func (Server) PublicAddr(publicAddr string) func(*config.Server) {
 	return func(c *config.Server) {
 		c.PublicAddr = publicAddr
 	}
 }
 
 // Attributes are server settings that are accessible via the API.
-func (server) Attributes(attributes *attributes.Attributes) func(*config.Server) {
+func (Server) Attributes(attributes *attributes.Attributes) func(*config.Server) {
 	return func(c *config.Server) {
 		c.Attributes = attributes
 	}
 }
 
 // GRPCOptions provide []grpc.ServerOption to the server.
-func (server) GRPCOptions(options ...grpc.ServerOption) func(*config.Server) {
+func (Server) GRPCOptions(options ...grpc.ServerOption) func(*config.Server) {
 	return func(c *config.Server) {
 		c.GRPCOptions = append(c.GRPCOptions, options...)
 	}
