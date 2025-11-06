@@ -17,6 +17,7 @@
 package rpcplatform
 
 import (
+	"github.com/nexcode/rpcplatform/internal/config"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver/manual"
 )
@@ -26,4 +27,5 @@ type Client struct {
 	target   string
 	client   *grpc.ClientConn
 	resolver *manual.Resolver
+	config   *config.Client
 }

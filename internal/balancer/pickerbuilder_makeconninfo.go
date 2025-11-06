@@ -21,7 +21,8 @@ import (
 	"math"
 	"slices"
 
-	"github.com/nexcode/rpcplatform/internal/attributes"
+	"github.com/nexcode/rpcplatform/internal/config"
+	"github.com/nexcode/rpcplatform/internal/grpcattrs"
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
 )
@@ -34,12 +35,18 @@ type connInfo struct {
 	count    int
 }
 
-func (pb *pickerBuilder) makeConnInfo(pickerInfo base.PickerBuildInfo) ([]*connInfo, int) {
+func (*pickerBuilder) makeConnInfo(pickerInfo base.PickerBuildInfo) ([]*connInfo, int) {
 	connInfoArr := make([]*connInfo, 0, len(pickerInfo.ReadySCs))
+
 	var totalWeight int
+	var config *config.Client
 
 	for subConn, subConnInfo := range pickerInfo.ReadySCs {
-		attributes := subConnInfo.Address.Attributes.Value(struct{}{}).(*attributes.Attributes)
+		if config == nil {
+			config = grpcattrs.GetClientConfig(subConnInfo.Address.Attributes)
+		}
+
+		attributes := grpcattrs.GetAttributes(subConnInfo.Address.Attributes)
 
 		if attributes.BalancerWeight <= 0 {
 			continue
@@ -56,8 +63,8 @@ func (pb *pickerBuilder) makeConnInfo(pickerInfo base.PickerBuildInfo) ([]*connI
 		return cmp.Compare(b.priority, a.priority)
 	})
 
-	if pb.maxActiveServers > 0 && pb.maxActiveServers < len(connInfoArr) {
-		connInfoArr = connInfoArr[:pb.maxActiveServers]
+	if config.MaxActiveServers > 0 && config.MaxActiveServers < len(connInfoArr) {
+		connInfoArr = connInfoArr[:config.MaxActiveServers]
 	}
 
 	for _, connInfo := range connInfoArr {

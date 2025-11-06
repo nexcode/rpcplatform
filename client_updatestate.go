@@ -17,19 +17,20 @@
 package rpcplatform
 
 import (
-	"google.golang.org/grpc/attributes"
+	"github.com/nexcode/rpcplatform/internal/grpcattrs"
 	"google.golang.org/grpc/resolver"
 )
 
 func (c *Client) updateState(init bool, serverInfoTree map[string]*ServerInfo) {
 	state := resolver.State{
 		Addresses: make([]resolver.Address, 0, len(serverInfoTree)),
+		// Attributes: grpcattrs.SetClientConfig(nil, c.config), // https://github.com/grpc/grpc-go/pull/8696
 	}
 
 	for _, value := range serverInfoTree {
 		state.Addresses = append(state.Addresses, resolver.Address{
 			Addr:       value.Address,
-			Attributes: attributes.New(struct{}{}, value.Attributes),
+			Attributes: grpcattrs.SetClientConfig(grpcattrs.SetAttributes(nil, value.Attributes), c.config),
 		})
 	}
 

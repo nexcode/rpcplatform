@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package resolver
+package rpcplatform
 
 import (
-	"google.golang.org/grpc/resolver/manual"
+	"github.com/nexcode/rpcplatform/internal/balancer"
 )
 
-func New() *manual.Resolver {
-	return manual.NewBuilderWithScheme("rpcplatform")
+func init() {
+	balancer.Register()
 }

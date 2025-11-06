@@ -21,10 +21,8 @@ import (
 	"google.golang.org/grpc/balancer/base"
 )
 
-func Register(name string, maxActiveServers int) {
-	balancer.Register(base.NewBalancerBuilder(name, &pickerBuilder{
-		maxActiveServers: maxActiveServers,
-	}, base.Config{
+func Register() {
+	balancer.Register(base.NewBalancerBuilder("rpcplatform", &pickerBuilder{}, base.Config{
 		HealthCheck: true,
 	}))
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-package resolver
+package grpcattrs
 
 import (
-	"google.golang.org/grpc/resolver/manual"
+	"github.com/nexcode/rpcplatform/internal/config"
+	grpcattrs "google.golang.org/grpc/attributes"
 )
 
-func New() *manual.Resolver {
-	return manual.NewBuilderWithScheme("rpcplatform")
+func GetClientConfig(attrs *grpcattrs.Attributes) *config.Client {
+	value, _ := attrs.Value(keyClientConfig).(*config.Client)
+	return value
+}
+
+func SetClientConfig(attrs *grpcattrs.Attributes, value *config.Client) *grpcattrs.Attributes {
+	return attrs.WithValue(keyClientConfig, value)
 }

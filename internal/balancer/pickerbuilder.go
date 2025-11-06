@@ -16,6 +16,4 @@
 
 package balancer
 
-type pickerBuilder struct {
-	maxActiveServers int
-}
+type pickerBuilder struct{}

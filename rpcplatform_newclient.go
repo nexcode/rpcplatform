@@ -20,7 +20,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/nexcode/rpcplatform/internal/balancer"
 	"github.com/nexcode/rpcplatform/internal/config"
 	"github.com/nexcode/rpcplatform/internal/gears"
 	"github.com/nexcode/rpcplatform/internal/resolver"
@@ -39,13 +38,11 @@ func (p *RPCPlatform) NewClient(target string, options ...ClientOption) (*Client
 		option(config)
 	}
 
-	balancerName := gears.UID()
-	balancer.Register(balancerName, config.MaxActiveServers)
-
 	c := &Client{
 		id:       gears.UID(),
 		target:   p.etcdPrefix + gears.FixPath(target) + "/",
-		resolver: resolver.NewResolver(),
+		resolver: resolver.New(),
+		config:   config,
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -68,7 +65,7 @@ func (p *RPCPlatform) NewClient(target string, options ...ClientOption) (*Client
 
 	config.GRPCOptions = append(config.GRPCOptions,
 		grpc.WithResolvers(c.resolver),
-		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"`+balancerName+`":{}}]}`),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"rpcplatform":{}}]}`),
 	)
 
 	if p.config.OpenTelemetry != nil {
@@ -80,7 +77,7 @@ func (p *RPCPlatform) NewClient(target string, options ...ClientOption) (*Client
 		config.GRPCOptions = append(config.GRPCOptions, grpc.WithStatsHandler(statsHandler))
 	}
 
-	c.client, err = grpc.NewClient(target, config.GRPCOptions...)
+	c.client, err = grpc.NewClient(c.resolver.Scheme()+":"+target, config.GRPCOptions...)
 	if err != nil {
 		return nil, err
 	}
