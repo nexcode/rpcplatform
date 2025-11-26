@@ -41,8 +41,7 @@ func main() {
 	}
 
 	otlpExporter, err := otlptracegrpc.New(context.Background(),
-		otlptracegrpc.WithEndpoint("localhost:4317"),
-		otlptracegrpc.WithInsecure(),
+		otlptracegrpc.WithEndpoint("localhost:4317"), otlptracegrpc.WithInsecure(),
 	)
 
 	if err != nil {
@@ -58,14 +57,14 @@ func main() {
 		rpcplatform.PlatformOptions.ClientOptions(
 			rpcplatform.ClientOptions.GRPCOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
 		),
-		rpcplatform.PlatformOptions.OpenTelemetry("client", 1, otlpExporter, zipkinExporter),
+		rpcplatform.PlatformOptions.OpenTelemetry("myServiceOne", 1, otlpExporter, zipkinExporter),
 	)
 
 	if err != nil {
 		panic(err)
 	}
 
-	client, err := rpcp.NewClient("server")
+	client, err := rpcp.NewClient("myServerName")
 	if err != nil {
 		panic(err)
 	}

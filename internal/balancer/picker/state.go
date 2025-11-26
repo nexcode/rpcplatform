@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-package balancer
+package picker
 
 import (
 	"google.golang.org/grpc/balancer"
-	"google.golang.org/grpc/balancer/base"
 )
 
-func (pb *pickerBuilder) Build(pickerInfo base.PickerBuildInfo) balancer.Picker {
-	if len(pickerInfo.ReadySCs) == 0 {
-		return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
-	}
-
-	connInfoArr, totalWeight := pb.makeConnInfo(pickerInfo)
-	if totalWeight == 0 {
-		return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
-	}
-
-	return pb.makePicker(connInfoArr, totalWeight)
+type state struct {
+	picker   balancer.Picker
+	priority int
+	weight   int
+	factor   int
+	count    int
 }

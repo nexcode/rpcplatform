@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-package balancer
+package picker
 
-import (
-	"sync"
+import "errors"
 
-	"google.golang.org/grpc/balancer"
-)
-
-type picker struct {
-	subConns []balancer.SubConn
-	mu       sync.Mutex
-	next     int
-}
+var errNoServerAvailableForPick = errors.New("no server available for pick")

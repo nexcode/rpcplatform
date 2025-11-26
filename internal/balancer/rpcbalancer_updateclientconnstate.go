@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,15 @@
 package balancer
 
 import (
+	"github.com/nexcode/rpcplatform/internal/grpcattrs"
 	"google.golang.org/grpc/balancer"
+	"google.golang.org/grpc/balancer/pickfirst"
 )
 
-func Register() {
-	balancer.Register(builder{})
+func (b *rpcBalancer) UpdateClientConnState(ccs balancer.ClientConnState) error {
+	b.config = grpcattrs.GetClientConfig(ccs.ResolverState.Attributes)
+
+	return b.Balancer.UpdateClientConnState(balancer.ClientConnState{
+		ResolverState: pickfirst.EnableHealthListener(ccs.ResolverState),
+	})
 }

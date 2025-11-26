@@ -25,6 +25,8 @@ import (
 	etcd "go.etcd.io/etcd/client/v3"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/zipkin"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type sumServer struct {
@@ -53,8 +55,7 @@ func main() {
 	}
 
 	otlpExporter, err := otlptracegrpc.New(context.Background(),
-		otlptracegrpc.WithEndpoint("localhost:4317"),
-		otlptracegrpc.WithInsecure(),
+		otlptracegrpc.WithEndpoint("localhost:4317"), otlptracegrpc.WithInsecure(),
 	)
 
 	if err != nil {
@@ -67,14 +68,17 @@ func main() {
 	}
 
 	rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
-		rpcplatform.PlatformOptions.OpenTelemetry("server", 1, otlpExporter, zipkinExporter),
+		rpcplatform.PlatformOptions.ClientOptions(
+			rpcplatform.ClientOptions.GRPCOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+		),
+		rpcplatform.PlatformOptions.OpenTelemetry("myServiceTwo", 1, otlpExporter, zipkinExporter),
 	)
 
 	if err != nil {
 		panic(err)
 	}
 
-	server, err := rpcp.NewServer("server", "localhost:")
+	server, err := rpcp.NewServer("myServerName", "localhost:")
 	if err != nil {
 		panic(err)
 	}

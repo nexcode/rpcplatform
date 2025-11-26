@@ -20,6 +20,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/nexcode/rpcplatform/internal/balancer"
 	"github.com/nexcode/rpcplatform/internal/config"
 	"github.com/nexcode/rpcplatform/internal/gears"
 	"github.com/nexcode/rpcplatform/internal/resolver"
@@ -65,7 +66,7 @@ func (p *RPCPlatform) NewClient(target string, options ...ClientOption) (*Client
 
 	config.GRPCOptions = append(config.GRPCOptions,
 		grpc.WithResolvers(c.resolver),
-		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"rpcplatform":{}}]}`),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"`+balancer.Name+`":{}}]}`),
 	)
 
 	if p.config.OpenTelemetry != nil {

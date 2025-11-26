@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,12 @@
 package balancer
 
 import (
+	"github.com/nexcode/rpcplatform/internal/config"
 	"google.golang.org/grpc/balancer"
 )
 
-func (p *picker) Pick(balancer.PickInfo) (balancer.PickResult, error) {
-	p.mu.Lock()
-	subConn := p.subConns[p.next]
-	p.next = (p.next + 1) % len(p.subConns)
-	p.mu.Unlock()
-
-	return balancer.PickResult{
-		SubConn: subConn,
-	}, nil
+type rpcBalancer struct {
+	balancer.Balancer
+	balancer.ClientConn
+	config *config.Client
 }

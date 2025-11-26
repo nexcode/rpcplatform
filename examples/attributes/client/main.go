@@ -18,6 +18,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"time"
@@ -48,7 +49,19 @@ func main() {
 		panic(err)
 	}
 
-	client, err := rpcp.NewClient("server", rpcplatform.ClientOptions.MaxActiveServers(2))
+	lookup, err := rpcp.Lookup(context.Background(), "myServerName", true)
+	if err != nil {
+		panic(err)
+	}
+
+	go func() {
+		for {
+			lookup, _ := json.MarshalIndent(<-lookup, "", "  ")
+			fmt.Printf("lookup: %s\n", lookup)
+		}
+	}()
+
+	client, err := rpcp.NewClient("myServerName", rpcplatform.ClientOptions.MaxActiveServers(2))
 	if err != nil {
 		panic(err)
 	}

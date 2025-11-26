@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,14 @@
 package balancer
 
 import (
+	"github.com/nexcode/rpcplatform/internal/balancer/picker"
 	"google.golang.org/grpc/balancer"
+	"google.golang.org/grpc/balancer/endpointsharding"
 )
 
-func Register() {
-	balancer.Register(builder{})
+func (b *rpcBalancer) UpdateState(state balancer.State) {
+	childStates := endpointsharding.ChildStatesFromPicker(state.Picker)
+	state.Picker = picker.New(childStates, b.config)
+
+	b.ClientConn.UpdateState(state)
 }

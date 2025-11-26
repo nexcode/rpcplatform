@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package balancer
+package picker
 
 import (
 	"google.golang.org/grpc/balancer"
 )
 
-func Register() {
-	balancer.Register(builder{})
+func (p *picker) Pick(pickInfo balancer.PickInfo) (balancer.PickResult, error) {
+	p.mu.Lock()
+	picker := p.pickers[p.next]
+	p.next = (p.next + 1) % len(p.pickers)
+	p.mu.Unlock()
+
+	return picker.Pick(pickInfo)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,17 @@ package balancer
 
 import (
 	"google.golang.org/grpc/balancer"
+	"google.golang.org/grpc/balancer/endpointsharding"
+	"google.golang.org/grpc/balancer/pickfirst"
 )
 
-func Register() {
-	balancer.Register(builder{})
+func (builder) Build(cc balancer.ClientConn, opts balancer.BuildOptions) balancer.Balancer {
+	b := &rpcBalancer{
+		ClientConn: cc,
+	}
+
+	childBuilder := balancer.Get(pickfirst.Name).Build
+	b.Balancer = endpointsharding.NewBalancer(b, opts, childBuilder, endpointsharding.Options{})
+
+	return b
 }

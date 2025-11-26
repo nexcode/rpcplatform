@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,6 @@
 
 package balancer
 
-import (
-	"google.golang.org/grpc/balancer"
-)
-
-func Register() {
-	balancer.Register(builder{})
+func (builder) Name() string {
+	return Name
 }

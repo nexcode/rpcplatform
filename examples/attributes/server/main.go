@@ -23,6 +23,8 @@ import (
 	"github.com/nexcode/rpcplatform"
 	"github.com/nexcode/rpcplatform/examples/quickstart/proto"
 	etcd "go.etcd.io/etcd/client/v3"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type sumServer struct {
@@ -50,7 +52,12 @@ func main() {
 		panic(err)
 	}
 
-	rpcp, err := rpcplatform.New("rpcplatform", etcdClient)
+	rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
+		rpcplatform.PlatformOptions.ClientOptions(
+			rpcplatform.ClientOptions.GRPCOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+		),
+	)
+
 	if err != nil {
 		panic(err)
 	}
@@ -58,7 +65,7 @@ func main() {
 	attributes := rpcplatform.NewAttributes()
 	attributes.BalancerWeight = 4
 
-	server, err := rpcp.NewServer("server", "localhost:", rpcplatform.ServerOptions.Attributes(attributes))
+	server, err := rpcp.NewServer("myServerName", "localhost:", rpcplatform.ServerOptions.Attributes(attributes))
 	if err != nil {
 		panic(err)
 	}

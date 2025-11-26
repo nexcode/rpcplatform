@@ -23,14 +23,14 @@ import (
 
 func (c *Client) updateState(init bool, serverInfoTree map[string]*ServerInfo) {
 	state := resolver.State{
-		Addresses: make([]resolver.Address, 0, len(serverInfoTree)),
-		// Attributes: grpcattrs.SetClientConfig(nil, c.config), // https://github.com/grpc/grpc-go/pull/8696
+		Endpoints:  make([]resolver.Endpoint, 0, len(serverInfoTree)),
+		Attributes: grpcattrs.SetClientConfig(nil, c.config),
 	}
 
 	for _, value := range serverInfoTree {
-		state.Addresses = append(state.Addresses, resolver.Address{
-			Addr:       value.Address,
-			Attributes: grpcattrs.SetClientConfig(grpcattrs.SetAttributes(nil, value.Attributes), c.config),
+		state.Endpoints = append(state.Endpoints, resolver.Endpoint{
+			Addresses:  []resolver.Address{{Addr: value.Address}},
+			Attributes: grpcattrs.SetAttributes(nil, value.Attributes),
 		})
 	}
 
