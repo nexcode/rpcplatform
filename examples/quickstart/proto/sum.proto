@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-edition = "2023";
+edition = "2024";
 
 option go_package = "github.com/nexcode/rpcplatform/examples/quickstart/proto";
 

@@ -25,7 +25,6 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
-	sync "sync"
 	unsafe "unsafe"
 )
 
@@ -37,11 +36,13 @@ const (
 )
 
 type SumRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	A             *int64                 `protobuf:"varint,1,opt,name=a" json:"a,omitempty"`
-	B             *int64                 `protobuf:"varint,2,opt,name=b" json:"b,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_A           int64                  `protobuf:"varint,1,opt,name=a"`
+	xxx_hidden_B           int64                  `protobuf:"varint,2,opt,name=b"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *SumRequest) Reset() {
@@ -69,30 +70,83 @@ func (x *SumRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SumRequest.ProtoReflect.Descriptor instead.
-func (*SumRequest) Descriptor() ([]byte, []int) {
-	return file_sum_proto_rawDescGZIP(), []int{0}
-}
-
 func (x *SumRequest) GetA() int64 {
-	if x != nil && x.A != nil {
-		return *x.A
+	if x != nil {
+		return x.xxx_hidden_A
 	}
 	return 0
 }
 
 func (x *SumRequest) GetB() int64 {
-	if x != nil && x.B != nil {
-		return *x.B
+	if x != nil {
+		return x.xxx_hidden_B
 	}
 	return 0
 }
 
+func (x *SumRequest) SetA(v int64) {
+	x.xxx_hidden_A = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *SumRequest) SetB(v int64) {
+	x.xxx_hidden_B = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *SumRequest) HasA() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *SumRequest) HasB() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *SumRequest) ClearA() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_A = 0
+}
+
+func (x *SumRequest) ClearB() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_B = 0
+}
+
+type SumRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	A *int64
+	B *int64
+}
+
+func (b0 SumRequest_builder) Build() *SumRequest {
+	m0 := &SumRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.A != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_A = *b.A
+	}
+	if b.B != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_B = *b.B
+	}
+	return m0
+}
+
 type SumResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Sum           *int64                 `protobuf:"varint,1,opt,name=sum" json:"sum,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Sum         int64                  `protobuf:"varint,1,opt,name=sum"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *SumResponse) Reset() {
@@ -120,16 +174,45 @@ func (x *SumResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SumResponse.ProtoReflect.Descriptor instead.
-func (*SumResponse) Descriptor() ([]byte, []int) {
-	return file_sum_proto_rawDescGZIP(), []int{1}
-}
-
 func (x *SumResponse) GetSum() int64 {
-	if x != nil && x.Sum != nil {
-		return *x.Sum
+	if x != nil {
+		return x.xxx_hidden_Sum
 	}
 	return 0
+}
+
+func (x *SumResponse) SetSum(v int64) {
+	x.xxx_hidden_Sum = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *SumResponse) HasSum() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *SumResponse) ClearSum() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Sum = 0
+}
+
+type SumResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Sum *int64
+}
+
+func (b0 SumResponse_builder) Build() *SumResponse {
+	m0 := &SumResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Sum != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Sum = *b.Sum
+	}
+	return m0
 }
 
 var File_sum_proto protoreflect.FileDescriptor
@@ -144,19 +227,7 @@ const file_sum_proto_rawDesc = "" +
 	"\vSumResponse\x12\x10\n" +
 	"\x03sum\x18\x01 \x01(\x03R\x03sum2)\n" +
 	"\x03Sum\x12\"\n" +
-	"\x03Sum\x12\v.SumRequest\x1a\f.SumResponse\"\x00B:Z8github.com/nexcode/rpcplatform/examples/quickstart/protob\beditionsp\xe8\a"
-
-var (
-	file_sum_proto_rawDescOnce sync.Once
-	file_sum_proto_rawDescData []byte
-)
-
-func file_sum_proto_rawDescGZIP() []byte {
-	file_sum_proto_rawDescOnce.Do(func() {
-		file_sum_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_sum_proto_rawDesc), len(file_sum_proto_rawDesc)))
-	})
-	return file_sum_proto_rawDescData
-}
+	"\x03Sum\x12\v.SumRequest\x1a\f.SumResponse\"\x00B:Z8github.com/nexcode/rpcplatform/examples/quickstart/protob\beditionsp\xe9\a"
 
 var file_sum_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_sum_proto_goTypes = []any{

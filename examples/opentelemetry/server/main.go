@@ -40,9 +40,9 @@ func (s *sumServer) Sum(_ context.Context, request *proto.SumRequest) (*proto.Su
 
 	fmt.Println("request:", a, "+", b)
 
-	return &proto.SumResponse{
+	return proto.SumResponse_builder{
 		Sum: &sum,
-	}, nil
+	}.Build(), nil
 }
 
 func main() {

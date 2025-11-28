@@ -74,10 +74,10 @@ func main() {
 		a := int64(rand.Intn(10))
 		b := int64(rand.Intn(10))
 
-		resp, err := sumClient.Sum(context.Background(), &proto.SumRequest{
+		resp, err := sumClient.Sum(context.Background(), proto.SumRequest_builder{
 			A: &a,
 			B: &b,
-		})
+		}.Build())
 
 		if err != nil {
 			fmt.Println(err)
