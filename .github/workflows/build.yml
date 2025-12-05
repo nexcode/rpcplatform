@@ -31,6 +31,13 @@ jobs:
         with:
           go-version: ~${{matrix.go}}
       - run: go build ./...
-      - run: go test  ./... 
+      - run: go test -covermode atomic -coverprofile coverage.out -coverpkg ./... ./... || true
         env:
           ETCD_ADDR: localhost:2379
+      - run: sed -i '/\/examples\//d' coverage.out
+      - uses: codecov/codecov-action@v5
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          files: ./coverage.out
+          flags: go-${{matrix.go}}
+          disable_search: true

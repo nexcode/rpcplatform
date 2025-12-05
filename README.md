@@ -3,6 +3,7 @@
 [![Build](https://github.com/nexcode/rpcplatform/actions/workflows/build.yml/badge.svg)](https://github.com/nexcode/rpcplatform/actions/workflows/build.yml)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/nexcode/rpcplatform)](https://pkg.go.dev/github.com/nexcode/rpcplatform)
 [![GoReportCard](https://goreportcard.com/badge/github.com/nexcode/rpcplatform)](https://goreportcard.com/report/github.com/nexcode/rpcplatform)
+[![CodeCov](https://codecov.io/gh/nexcode/rpcplatform/graph/badge.svg)](https://codecov.io/gh/nexcode/rpcplatform)
 
 An `easy-to-use` platform for creating microservices without complex infrastructure solutions.
 Only [etcd](https://etcd.io) required. Out of the box you get a service discovery, tracing between
