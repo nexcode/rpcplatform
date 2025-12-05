@@ -17,8 +17,10 @@
 package rpcplatform
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/nexcode/rpcplatform/internal/config"
-	"github.com/nexcode/rpcplatform/internal/gears"
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
@@ -26,8 +28,18 @@ import (
 // All methods of this object are thread safe. You can create this object once
 // and use it in different places in your program.
 func New(etcdPrefix string, etcdClient *etcd.Client, options ...PlatformOption) (*RPCPlatform, error) {
+	if strings.Contains(etcdPrefix, "//") {
+		return nil, fmt.Errorf("%q: prefix contains «//»: %w", etcdPrefix, ErrInvalidEtcdPrefix)
+	}
+
 	if etcdPrefix != "" {
-		etcdPrefix = gears.FixPath(etcdPrefix)
+		if etcdPrefix[0] != '/' {
+			etcdPrefix = "/" + etcdPrefix
+		}
+
+		if etcdPrefix[len(etcdPrefix)-1] == '/' {
+			etcdPrefix = etcdPrefix[:len(etcdPrefix)-1]
+		}
 	}
 
 	config := config.NewPlatform()

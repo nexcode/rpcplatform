@@ -19,11 +19,11 @@ package picker
 import (
 	"cmp"
 	"math"
+	"math/rand/v2"
 	"slices"
 	"sync"
 
 	"github.com/nexcode/rpcplatform/internal/config"
-	"github.com/nexcode/rpcplatform/internal/gears"
 	"github.com/nexcode/rpcplatform/internal/grpcattrs"
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
@@ -36,16 +36,22 @@ func New(childStates []endpointsharding.ChildState, config *config.Client) balan
 		return base.NewErrPicker(errNoServerAvailableForPick)
 	}
 
+	var connecting bool
 	var totalWeight int
+
 	pickerStates := make([]*state, 0, len(childStates))
 
 	for _, childState := range childStates {
-		if childState.State.ConnectivityState != connectivity.Ready {
+		attributes := grpcattrs.GetAttributes(childState.Endpoint.Attributes)
+		if attributes.BalancerWeight <= 0 {
 			continue
 		}
 
-		attributes := grpcattrs.GetAttributes(childState.Endpoint.Attributes)
-		if attributes.BalancerWeight <= 0 {
+		if childState.State.ConnectivityState == connectivity.Connecting {
+			connecting = true
+		}
+
+		if childState.State.ConnectivityState != connectivity.Ready {
 			continue
 		}
 
@@ -57,6 +63,10 @@ func New(childStates []endpointsharding.ChildState, config *config.Client) balan
 	}
 
 	if len(pickerStates) == 0 {
+		if connecting {
+			return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
+		}
+
 		return base.NewErrPicker(errNoServerAvailableForPick)
 	}
 
@@ -99,7 +109,7 @@ func New(childStates []endpointsharding.ChildState, config *config.Client) balan
 		}
 	}
 
-	picker.next = gears.Intn(totalWeight)
+	picker.next = rand.IntN(totalWeight)
 	return picker
 }
 

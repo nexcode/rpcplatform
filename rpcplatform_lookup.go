@@ -18,17 +18,21 @@ package rpcplatform
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
-	"github.com/nexcode/rpcplatform/internal/gears"
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
-// Lookup returns information about available servers by name. If the watch is set to true, a new portion of data
+// Lookup returns information about available servers by target name. If the watch is set to true, a new portion of data
 // will be provided with each change. Otherwise the channel will be closed immediately after the first data is written.
 // The keys of the returned map are server IDs.
-func (p *RPCPlatform) Lookup(ctx context.Context, name string, watch bool) (<-chan map[string]*ServerInfo, error) {
-	target := p.etcdPrefix + gears.FixPath(name) + "/"
+func (p *RPCPlatform) Lookup(ctx context.Context, target string, watch bool) (<-chan map[string]*ServerInfo, error) {
+	if target == "" || strings.Contains(target, "/") {
+		return nil, fmt.Errorf("%q: target is empty or contains «/»: %w", target, ErrInvalidTargetName)
+	}
+
+	target = p.etcdPrefix + "/" + target + "/"
 
 	resp, err := p.etcdClient.Get(ctx, target, etcd.WithPrefix())
 	if err != nil {

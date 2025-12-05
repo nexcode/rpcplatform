@@ -16,13 +16,7 @@
 
 package gears
 
-import (
-	"math/rand"
-	"time"
-)
-
 var (
-	rnd     = rand.New(rand.NewSource(time.Now().UnixNano()))
 	unique  = randBytes()
 	counter = randUint32()
 )

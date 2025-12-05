@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 RPCPlatform Authors
+ * Copyright 2025 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package gears
+package rpcplatform
 
-func FixPath(path string) string {
-	if path[0] != '/' {
-		path = "/" + path
-	}
+import (
+	"errors"
+)
 
-	if path[len(path)-1] == '/' {
-		path = path[:len(path)-1]
-	}
-
-	return path
-}
+var (
+	ErrInvalidEtcdPrefix = errors.New("invalid etcd prefix")
+	ErrInvalidTargetName = errors.New("invalid target name")
+	ErrInvalidServerName = errors.New("invalid server name")
+)

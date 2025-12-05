@@ -35,7 +35,7 @@ func (s *Server) Serve() error {
 
 	go func() {
 		path := s.name + "/" + s.id
-		attributes := attributes.Values(s.attributes)
+		attributes := attributes.Values(s.config.Attributes)
 
 		for {
 			if global.Err() != nil {
@@ -51,8 +51,13 @@ func (s *Server) Serve() error {
 				continue
 			}
 
+			addr := s.config.PublicAddr
+			if addr == "" {
+				addr = s.listener.Addr().String()
+			}
+
 			ops := make([]etcd.Op, 0, len(attributes)/2+1)
-			ops = append(ops, etcd.OpPut(path, s.publicAddr, etcd.WithLease(lease.ID)))
+			ops = append(ops, etcd.OpPut(path, addr, etcd.WithLease(lease.ID)))
 
 			for i := 0; i < len(attributes); i += 2 {
 				ops = append(ops, etcd.OpPut(path+"/"+attributes[i], attributes[i+1], etcd.WithLease(lease.ID)))

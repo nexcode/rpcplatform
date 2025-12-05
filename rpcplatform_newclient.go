@@ -18,6 +18,8 @@ package rpcplatform
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/nexcode/rpcplatform/internal/balancer"
@@ -29,6 +31,10 @@ import (
 
 // NewClient creates a new client. You need to provide the target server name.
 func (p *RPCPlatform) NewClient(target string, options ...ClientOption) (*Client, error) {
+	if target == "" || strings.Contains(target, "/") {
+		return nil, fmt.Errorf("%q: target is empty or contains «/»: %w", target, ErrInvalidTargetName)
+	}
+
 	config := config.NewClient()
 
 	for _, option := range p.config.ClientOptions {
@@ -41,7 +47,7 @@ func (p *RPCPlatform) NewClient(target string, options ...ClientOption) (*Client
 
 	c := &Client{
 		id:       gears.UID(),
-		target:   p.etcdPrefix + gears.FixPath(target) + "/",
+		target:   p.etcdPrefix + "/" + target + "/",
 		resolver: resolver.New(),
 		config:   config,
 	}

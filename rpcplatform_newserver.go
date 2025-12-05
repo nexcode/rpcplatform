@@ -17,7 +17,9 @@
 package rpcplatform
 
 import (
+	"fmt"
 	"net"
+	"strings"
 
 	"github.com/nexcode/rpcplatform/internal/config"
 	"github.com/nexcode/rpcplatform/internal/gears"
@@ -26,6 +28,10 @@ import (
 
 // NewServer creates a new server. You need to provide the server name and listening address.
 func (p *RPCPlatform) NewServer(name, addr string, options ...ServerOption) (*Server, error) {
+	if name == "" || strings.Contains(name, "/") {
+		return nil, fmt.Errorf("%q: name is empty or contains «/»: %w", name, ErrInvalidServerName)
+	}
+
 	config := config.NewServer()
 
 	for _, option := range p.config.ServerOptions {
@@ -45,15 +51,15 @@ func (p *RPCPlatform) NewServer(name, addr string, options ...ServerOption) (*Se
 		return nil, err
 	}
 
-	if config.PublicAddr != "" {
-		addr = config.PublicAddr
-	} else {
-		addr = listener.Addr().String()
-	}
-
 	id := gears.UID()
 
 	if p.config.OpenTelemetry != nil {
+		if config.PublicAddr != "" {
+			addr = config.PublicAddr
+		} else {
+			addr = listener.Addr().String()
+		}
+
 		statsHandler, err := p.openTelemetry(id, listener.Addr(), addr)
 		if err != nil {
 			return nil, err
@@ -63,12 +69,11 @@ func (p *RPCPlatform) NewServer(name, addr string, options ...ServerOption) (*Se
 	}
 
 	return &Server{
-		id:         id,
-		name:       p.etcdPrefix + gears.FixPath(name),
-		etcd:       p.etcdClient,
-		server:     grpc.NewServer(config.GRPCOptions...),
-		listener:   listener,
-		attributes: config.Attributes,
-		publicAddr: addr,
+		id:       id,
+		name:     p.etcdPrefix + "/" + name,
+		etcd:     p.etcdClient,
+		server:   grpc.NewServer(config.GRPCOptions...),
+		listener: listener,
+		config:   config,
 	}, nil
 }

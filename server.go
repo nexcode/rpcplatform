@@ -19,16 +19,16 @@ package rpcplatform
 import (
 	"net"
 
+	"github.com/nexcode/rpcplatform/internal/config"
 	etcd "go.etcd.io/etcd/client/v3"
 	"google.golang.org/grpc"
 )
 
 type Server struct {
-	id         string
-	name       string
-	etcd       *etcd.Client
-	server     *grpc.Server
-	listener   net.Listener
-	attributes *Attributes
-	publicAddr string
+	id       string
+	name     string
+	etcd     *etcd.Client
+	server   *grpc.Server
+	listener net.Listener
+	config   *config.Server
 }
