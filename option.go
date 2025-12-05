@@ -20,11 +20,11 @@ import (
 	"github.com/nexcode/rpcplatform/internal/config"
 )
 
-// PlatformOption is used to pass [PlatformOptions] when creating a new [RPCPlatform]
+// PlatformOption is a functional option that configures an [RPCPlatform].
 type PlatformOption = func(*config.Platform)
 
-// ClientOption is used to pass [ClientOptions] when creating a new [Client]
+// ClientOption is a functional option that configures a [Client].
 type ClientOption = func(*config.Client)
 
-// ServerOption is used to pass [ServerOptions] when creating a new [Server]
+// ServerOption is a functional option that configures a [Server].
 type ServerOption = func(*config.Server)

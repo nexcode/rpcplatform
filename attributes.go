@@ -20,10 +20,10 @@ import (
 	"github.com/nexcode/rpcplatform/internal/attributes"
 )
 
-// NewAttributes returns attributes with default values.
+// NewAttributes returns new Attributes with default values.
 func NewAttributes() *Attributes {
 	return attributes.New()
 }
 
-// Attributes provides server attribute values.
+// Attributes contains server attribute values.
 type Attributes = attributes.Attributes

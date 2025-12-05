@@ -16,7 +16,7 @@
 
 package rpcplatform
 
-// ID return the client identifier.
+// ID returns the client identifier.
 func (c *Client) ID() string {
 	return c.id
 }

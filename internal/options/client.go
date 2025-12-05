@@ -24,23 +24,16 @@ import (
 type Client struct{}
 
 // MaxActiveServers sets the maximum number of active servers the client will connect to.
-// If there are more servers than this value, no requests will be made to them.
+// Servers exceeding this limit will not receive requests.
 func (Client) MaxActiveServers(count int) func(*config.Client) {
 	return func(c *config.Client) {
 		c.MaxActiveServers = count
 	}
 }
 
-// GRPCOptions provide []grpc.DialOption to the client.
+// GRPCOptions adds gRPC dial options to the client.
 func (Client) GRPCOptions(options ...grpc.DialOption) func(*config.Client) {
 	return func(c *config.Client) {
 		c.GRPCOptions = append(c.GRPCOptions, options...)
 	}
 }
-
-// var Client ClientOption = client{}
-
-// type ClientOption interface {
-// 	MaxActiveServers(count int) func(*config.Client)
-// 	GRPCOptions(options ...grpc.DialOption) func(*config.Client)
-// }

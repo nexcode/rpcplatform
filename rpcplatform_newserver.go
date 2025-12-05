@@ -26,7 +26,9 @@ import (
 	"google.golang.org/grpc"
 )
 
-// NewServer creates a new server. You need to provide the server name and listening address.
+// NewServer creates a new server with the given name listening on addr.
+// If addr is empty, the server listens on all available interfaces.
+// If the port is 0, a random available port is automatically assigned.
 func (p *RPCPlatform) NewServer(name, addr string, options ...ServerOption) (*Server, error) {
 	if name == "" || strings.Contains(name, "/") {
 		return nil, fmt.Errorf("%q: name is empty or contains «/»: %w", name, ErrInvalidServerName)

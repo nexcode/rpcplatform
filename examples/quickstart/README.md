@@ -1,6 +1,6 @@
 ## Introduction to gRPC usage
 
-This example contains an already compiled [proto](proto) package.
+This example contains a pre-compiled [proto](proto) package.
 Detailed instructions for rebuilding (if needed) are [attached](proto/README.md).
 
 ## Launching this demo
@@ -20,11 +20,11 @@ cd examples/quickstart/client
 go run .
 ```
 
-Now two servers and one client are running!  
+You should now have two servers and one client running!
 
-## It works?
+## Does it work?
 
-Your console will have the corresponding logs:
+You will see the corresponding logs in your console:
 
 ```shell
 request: 4 + 9
@@ -41,5 +41,5 @@ request: 3 + 0
 1 + 3 = 4
 ```
 
-You can start new servers, stop running ones and add or remove clients...
-Everything will work!
+You can start additional servers, stop existing ones, and add or remove clients.
+The system will continue to function correctly!

@@ -24,21 +24,21 @@ import (
 
 type Server struct{}
 
-// PublicAddr is used when the server is not accessible to clients at the address it is located at.
+// PublicAddr sets the public address for the server when it is not accessible to clients at its listening address.
 func (Server) PublicAddr(publicAddr string) func(*config.Server) {
 	return func(c *config.Server) {
 		c.PublicAddr = publicAddr
 	}
 }
 
-// Attributes are server settings that are accessible via the API.
+// Attributes sets server attributes that are applied by the server and accessible via the Lookup method.
 func (Server) Attributes(attributes *attributes.Attributes) func(*config.Server) {
 	return func(c *config.Server) {
 		c.Attributes = attributes
 	}
 }
 
-// GRPCOptions provide []grpc.ServerOption to the server.
+// GRPCOptions adds gRPC server options to the server.
 func (Server) GRPCOptions(options ...grpc.ServerOption) func(*config.Server) {
 	return func(c *config.Server) {
 		c.GRPCOptions = append(c.GRPCOptions, options...)

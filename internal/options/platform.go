@@ -23,21 +23,23 @@ import (
 
 type Platform struct{}
 
-// ClientOptions sets global settings for new clients that can be overwritten by local settings for each client.
+// ClientOptions sets default options for all new clients.
+// Local client options can override these global settings.
 func (Platform) ClientOptions(options ...func(*config.Client)) func(*config.Platform) {
 	return func(c *config.Platform) {
 		c.ClientOptions = append(c.ClientOptions, options...)
 	}
 }
 
-// ServerOptions sets global settings for new servers that can be overwritten by local settings for each server.
+// ServerOptions sets default options for all new servers.
+// Local server options can override these global settings.
 func (Platform) ServerOptions(options ...func(*config.Server)) func(*config.Platform) {
 	return func(c *config.Platform) {
 		c.ServerOptions = append(c.ServerOptions, options...)
 	}
 }
 
-// OpenTelemetry configures OpenTelemetry settings for clients and servers.
+// OpenTelemetry configures OpenTelemetry tracing for clients and servers.
 func (Platform) OpenTelemetry(serviceName string, sampleRate float64, exporters ...trace.SpanExporter) func(*config.Platform) {
 	return func(c *config.Platform) {
 		c.OpenTelemetry = &config.OpenTelemetry{

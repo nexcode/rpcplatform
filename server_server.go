@@ -18,7 +18,7 @@ package rpcplatform
 
 import "google.golang.org/grpc"
 
-// Server return the original gRPC Server object.
+// Server returns the underlying gRPC server.
 func (s *Server) Server() *grpc.Server {
 	return s.server
 }

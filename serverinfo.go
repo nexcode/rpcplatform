@@ -22,7 +22,7 @@ import (
 	"github.com/nexcode/rpcplatform/internal/attributes"
 )
 
-// ServerInfo is the state of the server in etcd.
+// ServerInfo contains information about a server stored in etcd.
 type ServerInfo struct {
 	Address    string
 	Attributes *Attributes

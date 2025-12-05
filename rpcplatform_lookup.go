@@ -24,9 +24,10 @@ import (
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
-// Lookup returns information about available servers by target name. If the watch is set to true, a new portion of data
-// will be provided with each change. Otherwise the channel will be closed immediately after the first data is written.
-// The keys of the returned map are server IDs.
+// Lookup returns information about available servers with the given name.
+// If watch is true, the returned channel sends updates whenever servers change.
+// If watch is false, the channel closes after the first update.
+// The returned map keys are server IDs.
 func (p *RPCPlatform) Lookup(ctx context.Context, target string, watch bool) (<-chan map[string]*ServerInfo, error) {
 	if target == "" || strings.Contains(target, "/") {
 		return nil, fmt.Errorf("%q: target is empty or contains «/»: %w", target, ErrInvalidTargetName)

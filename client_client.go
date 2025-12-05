@@ -20,7 +20,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-// Client return the original gRPC ClientConn object.
+// Client returns the underlying gRPC ClientConn.
 func (c *Client) Client() *grpc.ClientConn {
 	return c.client
 }

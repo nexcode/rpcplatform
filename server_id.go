@@ -16,7 +16,7 @@
 
 package rpcplatform
 
-// ID return the server identifier.
+// ID returns the server identifier.
 func (s *Server) ID() string {
 	return s.id
 }

@@ -25,7 +25,7 @@ import (
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
-// Serve starts the gRPC Server and return error if it occurs.
+// Serve starts the gRPC server and blocks until it exits or an error occurs.
 func (s *Server) Serve() error {
 	global, cancel := context.WithCancel(context.Background())
 

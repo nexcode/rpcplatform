@@ -24,9 +24,9 @@ import (
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
-// New creates an RPCPlatform object for further creation of clients and servers.
-// All methods of this object are thread safe. You can create this object once
-// and use it in different places in your program.
+// New creates a new RPCPlatform for creating clients and servers.
+// You can create one RPCPlatform instance and reuse it throughout your program.
+// All RPCPlatform methods are thread-safe.
 func New(etcdPrefix string, etcdClient *etcd.Client, options ...PlatformOption) (*RPCPlatform, error) {
 	if strings.Contains(etcdPrefix, "//") {
 		return nil, fmt.Errorf("%q: prefix contains «//»: %w", etcdPrefix, ErrInvalidEtcdPrefix)

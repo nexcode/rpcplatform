@@ -29,7 +29,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-// NewClient creates a new client. You need to provide the target server name.
+// NewClient creates a new client connecting to the specified server name.
 func (p *RPCPlatform) NewClient(target string, options ...ClientOption) (*Client, error) {
 	if target == "" || strings.Contains(target, "/") {
 		return nil, fmt.Errorf("%q: target is empty or contains «/»: %w", target, ErrInvalidTargetName)

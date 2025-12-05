@@ -21,12 +21,12 @@ import (
 )
 
 var (
-	// PlatformOptions provides options used when creating new RPCPlatform.
+	// PlatformOptions provides functional options for configuring RPCPlatform.
 	PlatformOptions = options.Platform{}
 
-	// ClientOptions provides options used when creating new Client.
+	// ClientOptions provides functional options for configuring Client.
 	ClientOptions = options.Client{}
 
-	// ServerOptions provides options used when creating new Server.
+	// ServerOptions provides functional options for configuring Server.
 	ServerOptions = options.Server{}
 )
