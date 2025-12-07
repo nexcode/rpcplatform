@@ -31,7 +31,7 @@ jobs:
         with:
           go-version: ~${{matrix.go}}
       - run: go build ./...
-      - run: go test -covermode atomic -coverprofile coverage.out -coverpkg ./... ./... || true
+      - run: go test -covermode atomic -coverprofile coverage.out -coverpkg ./... ./...
         env:
           ETCD_ADDR: localhost:2379
       - run: sed -i '/\/examples\//d' coverage.out
