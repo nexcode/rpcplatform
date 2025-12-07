@@ -29,7 +29,7 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
-func TestNew(t *testing.T) {
+func TestPicker(t *testing.T) {
 	t.Parallel()
 
 	childStates := []endpointsharding.ChildState{{
@@ -105,10 +105,24 @@ func TestNew(t *testing.T) {
 	}
 
 	picker := New(childStates, config).(*picker)
-
 	actualSequence := make([]int, len(picker.pickers))
-	for i, picker := range picker.pickers {
-		actualSequence[i] = picker.(*namedPicker).name
+	pickerNext := picker.next
+
+	for i, childPicker := range picker.pickers {
+		actualSequence[i] = childPicker.(*namedPicker).name
+
+		if _, err := picker.Pick(balancer.PickInfo{}); err != nil {
+			t.Fatalf("Pick() failed: %v", err)
+		}
+
+		pickerNext++
+		if pickerNext == len(picker.pickers) {
+			pickerNext = 0
+		}
+
+		if picker.next != pickerNext {
+			t.Errorf("picker next = %v, want: %v", picker.next, pickerNext)
+		}
 	}
 
 	expectedSequence := []int{2, 3, 4, 2, 3, 2, 2, 3, 4, 2, 3, 2, 2, 3, 4}

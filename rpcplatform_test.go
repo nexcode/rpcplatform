@@ -154,7 +154,7 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func TestLookup(t *testing.T) {
+func TestRPCPlatform_Lookup(t *testing.T) {
 	t.Parallel()
 
 	etcdClient := getEtcdClient(t)
@@ -216,7 +216,7 @@ func TestLookup(t *testing.T) {
 	t.Errorf("channel closed by timeout or unexpectedly")
 }
 
-func TestNewClient(t *testing.T) {
+func TestRPCPlatform_NewClient(t *testing.T) {
 	t.Parallel()
 
 	insecureTransport := PlatformOptions.ClientOptions(
@@ -339,7 +339,7 @@ func TestNewClient(t *testing.T) {
 	}
 }
 
-func TestNewServer(t *testing.T) {
+func TestRPCPlatform_NewServer(t *testing.T) {
 	t.Parallel()
 
 	type input struct {
