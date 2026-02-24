@@ -5,13 +5,13 @@
 [![GoReportCard](https://goreportcard.com/badge/github.com/nexcode/rpcplatform)](https://goreportcard.com/report/github.com/nexcode/rpcplatform)
 [![CodeCov](https://codecov.io/gh/nexcode/rpcplatform/graph/badge.svg)](https://codecov.io/gh/nexcode/rpcplatform)
 
-An `easy-to-use` platform for creating microservices without complex infrastructure dependencies.
-Only [etcd](https://etcd.io) is required. Out of the box you get service discovery, tracing between
-services and other useful features. [gRPC](https://grpc.io) is used for communication between services.
+An **easy-to-use** platform for building microservices without complex infrastructure dependencies.
+Only [etcd](https://etcd.io) is required. Out of the box, you get service discovery, distributed tracing, and other useful features.
+[gRPC](https://grpc.io) is used for communication between services.
 
 ## etcd is required
 
-If there is no etcd in your infrastructure, you can run it via
+If you don't have etcd in your infrastructure, you can run it via
 [Docker](https://etcd.io/docs/v3.6/op-guide/container/) for testing:
 
 ```shell
@@ -28,38 +28,98 @@ Just remember that the example above is for testing purposes!
 
 ## How does it work?
 
-All you need to do is assign a name to your server. When it starts, it will automatically select a free port and listen on it (unless you specify otherwise).
-All clients will connect to this server by its name. If there are multiple servers with the same name, load balancing is distributed among them.
+All you need to do is assign a name to your server. When it starts, it automatically selects an available port and listens on it (unless you specify otherwise).
+All clients will connect to this server by its name. If there are multiple server instances with the same name, the load is automatically distributed among them.
 
 > In the following code examples, error handling is omitted to improve readability. A pre-built [proto](examples/quickstart/proto) will also be used.
 
-First, let's create a new `rpcplatform` instance:
+First, let's create a new `rpcplatform` instance and a new server named `myServerName`, register the implementation of our `Sum` service, and run it on localhost:
 
 ```go
-rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
-	rpcplatform.PlatformOptions.ClientOptions(
-		rpcplatform.ClientOptions.GRPCOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
-	),
+package main
+
+import (
+	"context"
+
+	"github.com/nexcode/rpcplatform"
+	"github.com/nexcode/rpcplatform/examples/quickstart/proto"
+	etcd "go.etcd.io/etcd/client/v3"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
+
+type sumServer struct {
+	proto.UnimplementedSumServer
+}
+
+func (s *sumServer) Sum(_ context.Context, request *proto.SumRequest) (*proto.SumResponse, error) {
+	return proto.SumResponse_builder{
+		Sum: new(request.GetA() + request.GetB()),
+	}.Build(), nil
+}
+
+func main() {
+	etcdClient, _ := etcd.New(etcd.Config{
+		Endpoints: []string{"localhost:2379"},
+	})
+
+	rpcp, _ := rpcplatform.New("rpcplatform", etcdClient,
+		rpcplatform.PlatformOptions.ClientOptions(
+			rpcplatform.ClientOptions.GRPCOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+		),
+	)
+
+	server, _ := rpcp.NewServer("myServerName", "localhost:")
+	proto.RegisterSumServer(server.Server(), &sumServer{})
+	_ = server.Serve()
+}
 ```
 
-Now let's create a new server named `myServerName`, register the implementation of our `Sum` service and run it on localhost (`sumServer` implementation is omitted):
+For the client, we also create a new `rpcplatform` instance and a new client named `myServerName`:
 
 ```go
-server, err := rpcp.NewServer("myServerName", "localhost:")
-proto.RegisterSumServer(server.Server(), &sumServer{})
-err = server.Serve()
-```
+package main
 
-And finally, we create a client that connects to our `myServerName` (`sumClient` usage is omitted):
+import (
+	"context"
+	"fmt"
+	"math/rand/v2"
 
-```go
-client, err := rpcp.NewClient("myServerName")
-sumClient := proto.NewSumClient(client.Client())
+	"github.com/nexcode/rpcplatform"
+	"github.com/nexcode/rpcplatform/examples/quickstart/proto"
+	etcd "go.etcd.io/etcd/client/v3"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+)
+
+func main() {
+	etcdClient, _ := etcd.New(etcd.Config{
+		Endpoints: []string{"localhost:2379"},
+	})
+
+	rpcp, _ := rpcplatform.New("rpcplatform", etcdClient,
+		rpcplatform.PlatformOptions.ClientOptions(
+			rpcplatform.ClientOptions.GRPCOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
+		),
+	)
+
+	client, _ := rpcp.NewClient("myServerName")
+	sumClient := proto.NewSumClient(client.Client())
+
+	resp, _ := sumClient.Sum(context.Background(), proto.SumRequest_builder{
+		A: new(int64(rand.IntN(10))),
+		B: new(int64(rand.IntN(10))),
+	}.Build())
+
+	fmt.Println(resp.GetSum())
+}
 ```
 
 This setup is fully functional: you can add or remove copies of your server and create new clients dynamically.
-But to see our **service graph** and get **telemetry for all gRPC methods**, we need to run containers with telemetry services and enable telemetry in `rpcplatform`.
+
+### OpenTelemetry
+
+To visualize our **service graph** and get **telemetry for all gRPC methods**, we need to run containers with telemetry services and enable telemetry in `rpcplatform`.
 
 Let's run containers with Zipkin and Jaeger:
 
@@ -71,16 +131,14 @@ docker run -d --name jaeger -p 16686:16686 -p 4317:4317 jaegertracing/all-in-one
 Now let's create the necessary collectors and add the `OpenTelemetry` option to the `rpcplatform` instance:
 
 ```go
-otlpExporter, err := otlptracegrpc.New(context.Background(),
+otlpExporter, _ := otlptracegrpc.New(context.Background(),
 	otlptracegrpc.WithEndpoint("localhost:4317"), otlptracegrpc.WithInsecure(),
 )
 
-zipkinExporter, err := zipkin.New("http://localhost:9411/api/v2/spans")
+zipkinExporter, _ := zipkin.New("http://localhost:9411/api/v2/spans")
 
-rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
-	rpcplatform.PlatformOptions.ClientOptions(
-		rpcplatform.ClientOptions.GRPCOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
-	),
+rpcp, _ := rpcplatform.New("rpcplatform", etcdClient,
+	// other options...
 	rpcplatform.PlatformOptions.OpenTelemetry("myServiceName", 1, otlpExporter, zipkinExporter),
 )
 ```
@@ -91,7 +149,7 @@ The tracing dashboards are available at:
 | :------------------------------------------: | :------------------------------------------: |
 | ![Zipkin](examples/opentelemetry/zipkin.png) | ![Jaeger](examples/opentelemetry/jaeger.png) |
 
-## Usage examples (with source code)
+## Usage examples
 
 - [QuickStart](examples/quickstart): contains the simplest example without additional features
 - [OpenTelemetry](examples/opentelemetry): example integrating distributed tracing systems
