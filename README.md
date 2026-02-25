@@ -31,7 +31,7 @@ Just remember that the example above is for testing purposes!
 All you need to do is assign a name to your server. When it starts, it automatically selects an available port and listens on it (unless you specify otherwise).
 All clients will connect to this server by its name. If there are multiple server instances with the same name, the load is automatically distributed among them.
 
-> In the following code examples, error handling is omitted to improve readability. A pre-built [proto](examples/quickstart/proto) will also be used.
+> The following code examples use a pre-built [proto](examples/quickstart/proto).
 
 First, let's create a new `rpcplatform` instance and a new server named `myServerName`, register the implementation of our `Sum` service, and run it on localhost:
 
@@ -59,19 +59,34 @@ func (s *sumServer) Sum(_ context.Context, request *proto.SumRequest) (*proto.Su
 }
 
 func main() {
-	etcdClient, _ := etcd.New(etcd.Config{
+	etcdClient, err := etcd.New(etcd.Config{
 		Endpoints: []string{"localhost:2379"},
 	})
 
-	rpcp, _ := rpcplatform.New("rpcplatform", etcdClient,
+	if err != nil {
+		panic(err)
+	}
+
+	rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
 		rpcplatform.PlatformOptions.ClientOptions(
 			rpcplatform.ClientOptions.GRPCOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
 		),
 	)
 
-	server, _ := rpcp.NewServer("myServerName", "localhost:")
+	if err != nil {
+		panic(err)
+	}
+
+	server, err := rpcp.NewServer("myServerName", "localhost:")
+	if err != nil {
+		panic(err)
+	}
+
 	proto.RegisterSumServer(server.Server(), &sumServer{})
-	_ = server.Serve()
+
+	if err = server.Serve(); err != nil {
+		panic(err)
+	}
 }
 ```
 
@@ -83,7 +98,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"math/rand/v2"
+	"math/rand"
+	"time"
 
 	"github.com/nexcode/rpcplatform"
 	"github.com/nexcode/rpcplatform/examples/quickstart/proto"
@@ -93,29 +109,51 @@ import (
 )
 
 func main() {
-	etcdClient, _ := etcd.New(etcd.Config{
+	etcdClient, err := etcd.New(etcd.Config{
 		Endpoints: []string{"localhost:2379"},
 	})
 
-	rpcp, _ := rpcplatform.New("rpcplatform", etcdClient,
+	if err != nil {
+		panic(err)
+	}
+
+	rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
 		rpcplatform.PlatformOptions.ClientOptions(
 			rpcplatform.ClientOptions.GRPCOptions(grpc.WithTransportCredentials(insecure.NewCredentials())),
 		),
 	)
 
-	client, _ := rpcp.NewClient("myServerName")
+	if err != nil {
+		panic(err)
+	}
+
+	client, err := rpcp.NewClient("myServerName")
+	if err != nil {
+		panic(err)
+	}
+
 	sumClient := proto.NewSumClient(client.Client())
 
-	resp, _ := sumClient.Sum(context.Background(), proto.SumRequest_builder{
-		A: new(int64(rand.IntN(10))),
-		B: new(int64(rand.IntN(10))),
-	}.Build())
+	for {
+		time.Sleep(time.Second)
 
-	fmt.Println(resp.GetSum())
+		sumRequest := proto.SumRequest_builder{
+			A: new(int64(rand.Intn(10))),
+			B: new(int64(rand.Intn(10))),
+		}.Build()
+
+		sumResponse, err := sumClient.Sum(context.Background(), sumRequest)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		fmt.Println(sumRequest.GetA(), "+", sumRequest.GetB(), "=", sumResponse.GetSum())
+	}
 }
 ```
 
-This setup is fully functional: you can add or remove copies of your server and create new clients dynamically.
+That's all you need: add or remove server instances dynamically and create clients at any time — `rpcplatform` automatically handles service discovery and load balancing.
 
 ### OpenTelemetry
 
@@ -131,16 +169,24 @@ docker run -d --name jaeger -p 16686:16686 -p 4317:4317 jaegertracing/all-in-one
 Now let's create the necessary collectors and add the `OpenTelemetry` option to the `rpcplatform` instance:
 
 ```go
-otlpExporter, _ := otlptracegrpc.New(context.Background(),
-	otlptracegrpc.WithEndpoint("localhost:4317"), otlptracegrpc.WithInsecure(),
-)
+otlpExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithEndpoint("localhost:4317"), otlptracegrpc.WithInsecure())
+if err != nil {
+	panic(err)
+}
 
-zipkinExporter, _ := zipkin.New("http://localhost:9411/api/v2/spans")
+zipkinExporter, err := zipkin.New("http://localhost:9411/api/v2/spans")
+if err != nil {
+	panic(err)
+}
 
-rpcp, _ := rpcplatform.New("rpcplatform", etcdClient,
-	// other options...
+rpcp, err := rpcplatform.New("rpcplatform", etcdClient,
 	rpcplatform.PlatformOptions.OpenTelemetry("myServiceName", 1, otlpExporter, zipkinExporter),
+	// other options...
 )
+
+if err != nil {
+	panic(err)
+}
 ```
 
 The tracing dashboards are available at:
