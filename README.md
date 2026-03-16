@@ -4,6 +4,7 @@
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/nexcode/rpcplatform)](https://pkg.go.dev/github.com/nexcode/rpcplatform)
 [![GoReportCard](https://goreportcard.com/badge/github.com/nexcode/rpcplatform)](https://goreportcard.com/report/github.com/nexcode/rpcplatform)
 [![CodeCov](https://codecov.io/gh/nexcode/rpcplatform/graph/badge.svg)](https://codecov.io/gh/nexcode/rpcplatform)
+[![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go)
 
 An **easy-to-use** platform for building microservices without complex infrastructure dependencies.
 Only [etcd](https://etcd.io) is required. Out of the box, you get service discovery, distributed tracing, and other useful features.
