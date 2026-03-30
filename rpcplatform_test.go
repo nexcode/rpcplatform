@@ -183,7 +183,7 @@ func TestRPCPlatform_Lookup(t *testing.T) {
 	defer server.Server().Stop()
 
 	go func() {
-		if err := server.Serve(); err != nil {
+		if err := server.Serve(context.Background()); err != nil {
 			t.Errorf("Serve() failed: %v", err)
 		}
 	}()
@@ -305,7 +305,7 @@ func TestRPCPlatform_NewClient(t *testing.T) {
 				t.Fatalf("New() failed: %v", err)
 			}
 
-			client, err := rpcp.NewClient(tt.input.target, tt.input.clientOptions...)
+			client, err := rpcp.NewClient(context.Background(), tt.input.target, tt.input.clientOptions...)
 			if err != nil {
 				t.Fatalf("NewClient() failed: %v", err)
 			}
@@ -503,7 +503,7 @@ func TestRPCPlatform_NewServer(t *testing.T) {
 				server.Server().Stop()
 			}()
 
-			if err := server.Serve(); err != nil {
+			if err := server.Serve(context.Background()); err != nil {
 				t.Errorf("Serve() failed: %v", err)
 			}
 		})

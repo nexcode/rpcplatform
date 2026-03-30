@@ -27,10 +27,11 @@ import (
 	"github.com/nexcode/rpcplatform/internal/gears"
 	"github.com/nexcode/rpcplatform/internal/resolver"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
 )
 
 // NewClient creates a new client connecting to the specified server name.
-func (p *RPCPlatform) NewClient(target string, options ...ClientOption) (*Client, error) {
+func (p *RPCPlatform) NewClient(ctx context.Context, target string, options ...ClientOption) (*Client, error) {
 	if target == "" || strings.Contains(target, "/") {
 		return nil, fmt.Errorf("%q: target is empty or contains «/»: %w", target, ErrInvalidTargetName)
 	}
@@ -52,23 +53,21 @@ func (p *RPCPlatform) NewClient(target string, options ...ClientOption) (*Client
 		config:   config,
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(ctx)
+	timer := time.AfterFunc(config.EtcdClientTimeout, func() { cancel() })
 
 	serverInfoTree, err := p.Lookup(ctx, target, true)
+
+	if !timer.Stop() {
+		<-ctx.Done()
+		return nil, ctx.Err()
+	}
+
 	if err != nil {
 		return nil, err
 	}
 
-	select {
-	case serverInfoTree := <-serverInfoTree:
-		c.updateState(true, serverInfoTree)
-	case <-time.After(4 * time.Second):
-		cancel()
-	}
-
-	if err = ctx.Err(); err != nil {
-		return nil, err
-	}
+	c.updateState(true, <-serverInfoTree)
 
 	config.GRPCOptions = append(config.GRPCOptions,
 		grpc.WithResolvers(c.resolver),
@@ -90,8 +89,25 @@ func (p *RPCPlatform) NewClient(target string, options ...ClientOption) (*Client
 	}
 
 	go func() {
+		defer c.client.Close()
+
 		for serverInfoTree := range serverInfoTree {
 			c.updateState(false, serverInfoTree)
+		}
+	}()
+
+	go func() {
+		state := c.client.GetState()
+
+		for {
+			if !c.client.WaitForStateChange(ctx, state) {
+				return
+			}
+
+			if state = c.client.GetState(); state == connectivity.Shutdown {
+				cancel()
+				return
+			}
 		}
 	}()
 

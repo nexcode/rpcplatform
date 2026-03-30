@@ -17,14 +17,19 @@
 package config
 
 import (
+	"time"
+
 	"google.golang.org/grpc"
 )
 
 func NewClient() *Client {
-	return &Client{}
+	return &Client{
+		EtcdClientTimeout: 5 * time.Second,
+	}
 }
 
 type Client struct {
-	MaxActiveServers int
-	GRPCOptions      []grpc.DialOption
+	MaxActiveServers  int
+	EtcdClientTimeout time.Duration
+	GRPCOptions       []grpc.DialOption
 }

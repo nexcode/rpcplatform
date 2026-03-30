@@ -17,6 +17,8 @@
 package options
 
 import (
+	"time"
+
 	"github.com/nexcode/rpcplatform/internal/attributes"
 	"github.com/nexcode/rpcplatform/internal/config"
 	"google.golang.org/grpc"
@@ -28,6 +30,31 @@ type Server struct{}
 func (Server) PublicAddr(publicAddr string) func(*config.Server) {
 	return func(c *config.Server) {
 		c.PublicAddr = publicAddr
+	}
+}
+
+// StopTimeout sets the maximum duration the server will wait for a graceful stop.
+// If the timeout is greater than zero, a graceful stop is applied; otherwise, it stops immediately.
+// The default value is 0.
+func (Server) StopTimeout(timeout time.Duration) func(*config.Server) {
+	return func(c *config.Server) {
+		c.StopTimeout = timeout
+	}
+}
+
+// EtcdClientTimeout sets the timeout duration for server-side etcd client operations.
+// The default value is 5 seconds.
+func (Server) EtcdClientTimeout(timeout time.Duration) func(*config.Server) {
+	return func(c *config.Server) {
+		c.EtcdClientTimeout = timeout
+	}
+}
+
+// EtcdLeaseTimeout sets the Time-To-Live (TTL) duration for the etcd lease.
+// The default value is 5 seconds.
+func (Server) EtcdLeaseTimeout(timeout time.Duration) func(*config.Server) {
+	return func(c *config.Server) {
+		c.EtcdLeaseTimeout = timeout
 	}
 }
 

@@ -48,7 +48,7 @@ func main() {
 		panic(err)
 	}
 
-	client, err := rpcp.NewClient("myServerName")
+	client, err := rpcp.NewClient(context.Background(), "myServerName")
 	if err != nil {
 		panic(err)
 	}

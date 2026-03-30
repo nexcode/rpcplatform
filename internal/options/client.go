@@ -17,6 +17,8 @@
 package options
 
 import (
+	"time"
+
 	"github.com/nexcode/rpcplatform/internal/config"
 	"google.golang.org/grpc"
 )
@@ -28,6 +30,14 @@ type Client struct{}
 func (Client) MaxActiveServers(count int) func(*config.Client) {
 	return func(c *config.Client) {
 		c.MaxActiveServers = count
+	}
+}
+
+// EtcdClientTimeout sets the timeout duration for server-side etcd client operations.
+// The default value is 5 seconds.
+func (Client) EtcdClientTimeout(timeout time.Duration) func(*config.Client) {
+	return func(c *config.Client) {
+		c.EtcdClientTimeout = timeout
 	}
 }
 

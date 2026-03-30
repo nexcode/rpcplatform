@@ -17,18 +17,25 @@
 package config
 
 import (
+	"time"
+
 	"github.com/nexcode/rpcplatform/internal/attributes"
 	"google.golang.org/grpc"
 )
 
 func NewServer() *Server {
 	return &Server{
-		Attributes: attributes.New(),
+		EtcdClientTimeout: 5 * time.Second,
+		EtcdLeaseTimeout:  5 * time.Second,
+		Attributes:        attributes.New(),
 	}
 }
 
 type Server struct {
-	PublicAddr  string
-	Attributes  *attributes.Attributes
-	GRPCOptions []grpc.ServerOption
+	PublicAddr        string
+	StopTimeout       time.Duration
+	EtcdClientTimeout time.Duration
+	EtcdLeaseTimeout  time.Duration
+	Attributes        *attributes.Attributes
+	GRPCOptions       []grpc.ServerOption
 }

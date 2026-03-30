@@ -72,7 +72,7 @@ func main() {
 
 	proto.RegisterSumServer(server.Server(), &sumServer{})
 
-	if err = server.Serve(); err != nil {
+	if err = server.Serve(context.Background()); err != nil {
 		panic(err)
 	}
 }

@@ -18,36 +18,45 @@ package rpcplatform
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/nexcode/rpcplatform/internal/attributes"
+	"github.com/nexcode/rpcplatform/internal/gears"
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
 // Serve starts the gRPC server and blocks until it exits or an error occurs.
-func (s *Server) Serve() error {
-	global, cancel := context.WithCancel(context.Background())
+func (s *Server) Serve(ctx context.Context) error {
+	path := s.name + "/" + s.id
+	attributes := attributes.Values(s.config.Attributes)
 
-	defer func() {
-		cancel()
-	}()
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 
 	go func() {
-		path := s.name + "/" + s.id
-		attributes := attributes.Values(s.config.Attributes)
+		defer func() {
+			timer := time.AfterFunc(s.config.StopTimeout, func() {
+				s.Server().Stop()
+			})
+
+			if s.config.StopTimeout > 0 {
+				s.Server().GracefulStop()
+				timer.Stop()
+			}
+		}()
 
 		for {
-			if global.Err() != nil {
-				break
+			if ctx.Err() != nil {
+				return
 			}
 
-			ctx, cancel := context.WithTimeout(global, 4*time.Second)
-			lease, err := s.etcd.Grant(ctx, 4)
-			cancel()
+			ctxTimeout, cancelTimeout := gears.ContextTimeout(ctx, s.config.EtcdClientTimeout)
+			lease, err := s.etcd.Grant(ctxTimeout, int64(s.config.EtcdLeaseTimeout.Seconds()))
+			cancelTimeout()
 
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				continue
 			}
 
@@ -63,12 +72,12 @@ func (s *Server) Serve() error {
 				ops = append(ops, etcd.OpPut(path+"/"+attributes[i], attributes[i+1], etcd.WithLease(lease.ID)))
 			}
 
-			ctx, cancel = context.WithTimeout(global, 4*time.Second)
-			resp, err := s.etcd.Txn(ctx).Then(ops...).Commit()
-			cancel()
+			ctxTimeout, cancelTimeout = gears.ContextTimeout(ctx, s.config.EtcdClientTimeout)
+			resp, err := s.etcd.Txn(ctxTimeout).Then(ops...).Commit()
+			cancelTimeout()
 
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				continue
 			}
 
@@ -76,9 +85,9 @@ func (s *Server) Serve() error {
 				continue
 			}
 
-			keepAlive, err := s.etcd.KeepAlive(global, lease.ID)
+			keepAlive, err := s.etcd.KeepAlive(ctx, lease.ID)
 			if err != nil {
-				fmt.Println(err)
+				log.Println(err)
 				continue
 			}
 

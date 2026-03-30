@@ -61,7 +61,7 @@ func main() {
 		}
 	}()
 
-	client, err := rpcp.NewClient("myServerName", rpcplatform.ClientOptions.MaxActiveServers(2))
+	client, err := rpcp.NewClient(context.Background(), "myServerName", rpcplatform.ClientOptions.MaxActiveServers(2))
 	if err != nil {
 		panic(err)
 	}
