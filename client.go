@@ -22,10 +22,11 @@ import (
 	"google.golang.org/grpc/resolver/manual"
 )
 
-type Client struct {
+type Client[T any] struct {
 	id       string
 	target   string
 	client   *grpc.ClientConn
 	resolver *manual.Resolver
 	config   *config.Client
+	service  T
 }

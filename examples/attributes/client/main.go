@@ -61,12 +61,10 @@ func main() {
 		}
 	}()
 
-	client, err := rpcp.NewClient(context.Background(), "myServerName", rpcplatform.ClientOptions.MaxActiveServers(2))
+	client, err := rpcp.NewClient(context.Background(), "myServerName", proto.NewSumClient, rpcplatform.ClientOptions.MaxActiveServers(2))
 	if err != nil {
 		panic(err)
 	}
-
-	sumClient := proto.NewSumClient(client.Client())
 
 	for {
 		time.Sleep(time.Second)
@@ -74,7 +72,7 @@ func main() {
 		a := int64(rand.Intn(10))
 		b := int64(rand.Intn(10))
 
-		resp, err := sumClient.Sum(context.Background(), proto.SumRequest_builder{
+		resp, err := client.Service().Sum(context.Background(), proto.SumRequest_builder{
 			A: &a,
 			B: &b,
 		}.Build())

@@ -21,6 +21,6 @@ import (
 )
 
 // Client returns the underlying gRPC ClientConn.
-func (c *Client) Client() *grpc.ClientConn {
+func (c *Client[T]) Client() *grpc.ClientConn {
 	return c.client
 }

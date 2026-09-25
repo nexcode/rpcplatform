@@ -29,11 +29,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-type sumServer struct {
+type SumServer struct {
 	proto.UnimplementedSumServer
 }
 
-func (s *sumServer) Sum(_ context.Context, request *proto.SumRequest) (*proto.SumResponse, error) {
+func (s *SumServer) Sum(_ context.Context, request *proto.SumRequest) (*proto.SumResponse, error) {
 	a := request.GetA()
 	b := request.GetB()
 	sum := a + b
@@ -78,12 +78,10 @@ func main() {
 		panic(err)
 	}
 
-	server, err := rpcp.NewServer("myServerName", "localhost:")
+	server, err := rpcp.NewServer("myServerName", "localhost:", proto.RegisterSumServer, &SumServer{})
 	if err != nil {
 		panic(err)
 	}
-
-	proto.RegisterSumServer(server.Server(), &sumServer{})
 
 	if err = server.Serve(context.Background()); err != nil {
 		panic(err)

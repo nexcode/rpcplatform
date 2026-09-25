@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 RPCPlatform Authors
+ * Copyright 2026 RPCPlatform Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package rpcplatform
 
-// ID returns the client identifier.
-func (c *Client[T]) ID() string {
-	return c.id
+// Service returns the typed gRPC service client.
+func (c *Client[T]) Service() T {
+	return c.service
 }

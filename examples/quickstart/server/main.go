@@ -62,12 +62,10 @@ func main() {
 		panic(err)
 	}
 
-	server, err := rpcp.NewServer("myServerName", "localhost:")
+	server, err := rpcp.NewServer("myServerName", "localhost:", proto.RegisterSumServer, &sumServer{})
 	if err != nil {
 		panic(err)
 	}
-
-	proto.RegisterSumServer(server.Server(), &sumServer{})
 
 	if err = server.Serve(context.Background()); err != nil {
 		panic(err)

@@ -78,12 +78,10 @@ func main() {
 		panic(err)
 	}
 
-	server, err := rpcp.NewServer("myServerName", "localhost:")
+	server, err := rpcp.NewServer("myServerName", "localhost:", proto.RegisterSumServer, &sumServer{})
 	if err != nil {
 		panic(err)
 	}
-
-	proto.RegisterSumServer(server.Server(), &sumServer{})
 
 	if err = server.Serve(context.Background()); err != nil {
 		panic(err)
@@ -128,12 +126,10 @@ func main() {
 		panic(err)
 	}
 
-	client, err := rpcp.NewClient(context.Background(), "myServerName")
+	client, err := rpcp.NewClient(context.Background(), "myServerName", proto.NewSumClient)
 	if err != nil {
 		panic(err)
 	}
-
-	sumClient := proto.NewSumClient(client.Client())
 
 	for {
 		time.Sleep(time.Second)
@@ -143,7 +139,7 @@ func main() {
 			B: new(int64(rand.Intn(10))),
 		}.Build()
 
-		sumResponse, err := sumClient.Sum(context.Background(), sumRequest)
+		sumResponse, err := client.Service().Sum(context.Background(), sumRequest)
 		if err != nil {
 			fmt.Println(err)
 			continue

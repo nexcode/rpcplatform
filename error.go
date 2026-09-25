@@ -21,7 +21,8 @@ import (
 )
 
 var (
-	ErrInvalidEtcdPrefix = errors.New("invalid etcd prefix")
-	ErrInvalidTargetName = errors.New("invalid target name")
-	ErrInvalidServerName = errors.New("invalid server name")
+	ErrInvalidEtcdPrefix   = errors.New("invalid etcd prefix")
+	ErrInvalidTargetName   = errors.New("invalid target name")
+	ErrInvalidServerName   = errors.New("invalid server name")
+	ErrMismatchServiceType = errors.New("mismatch service type")
 )

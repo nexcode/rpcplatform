@@ -5,17 +5,17 @@ This example is similar to the [QuickStart](../quickstart) example, but it uses 
 ## Launching this demo
 
 ```shell
-cd examples/opentelemetry/server
+cd examples/attributes/server
 go run .
 ```
 
 ```shell
-cd examples/opentelemetry/server
+cd examples/attributes/server
 go run .
 ```
 
 ```shell
-cd examples/opentelemetry/client
+cd examples/attributes/client
 go run .
 ```
 

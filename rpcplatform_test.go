@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nexcode/rpcplatform/examples/quickstart/proto"
 	"github.com/nexcode/rpcplatform/internal/attributes"
 	etcd "go.etcd.io/etcd/client/v3"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
@@ -56,27 +57,27 @@ func TestNew(t *testing.T) {
 		{
 			"Empty etcd prefix",
 			input{etcdPrefix: ""},
-			expected{etcdPrefix: pointer("")},
+			expected{etcdPrefix: new("")},
 		}, {
 			"Only slash in etcd prefix",
 			input{etcdPrefix: "/"},
-			expected{etcdPrefix: pointer("")},
+			expected{etcdPrefix: new("")},
 		}, {
 			"No slash in etcd prefix",
 			input{etcdPrefix: "a"},
-			expected{etcdPrefix: pointer("/a")},
+			expected{etcdPrefix: new("/a")},
 		}, {
 			"Leading slash in etcd prefix",
 			input{etcdPrefix: "/a"},
-			expected{etcdPrefix: pointer("/a")},
+			expected{etcdPrefix: new("/a")},
 		}, {
 			"Trailing slash in etcd prefix",
 			input{etcdPrefix: "a/"},
-			expected{etcdPrefix: pointer("/a")},
+			expected{etcdPrefix: new("/a")},
 		}, {
 			"Multiple slashes in etcd prefix",
 			input{etcdPrefix: "/a/b/"},
-			expected{etcdPrefix: pointer("/a/b")},
+			expected{etcdPrefix: new("/a/b")},
 		}, {
 			"Provide additional platform options",
 			input{
@@ -93,11 +94,11 @@ func TestNew(t *testing.T) {
 				},
 			},
 			expected{
-				otelServiceName:  pointer("testName"),
-				otelSampleRate:   pointer(0.5),
-				otelExportersLen: pointer(2),
-				serverOptionsLen: pointer(2),
-				clientOptionsLen: pointer(2),
+				otelServiceName:  new("testName"),
+				otelSampleRate:   new(0.5),
+				otelExportersLen: new(2),
+				serverOptionsLen: new(2),
+				clientOptionsLen: new(2),
 			},
 		},
 	}
@@ -172,7 +173,7 @@ func TestRPCPlatform_Lookup(t *testing.T) {
 	serverName := "testLookup"
 	publicAddr := "1.2.3.4:56789"
 
-	server, err := rpcp.NewServer(serverName, "localhost:",
+	server, err := rpcp.NewServer(serverName, "localhost:", proto.RegisterSumServer, &sumServer{},
 		ServerOptions.Attributes(attrs), ServerOptions.PublicAddr(publicAddr),
 	)
 
@@ -248,7 +249,7 @@ func TestRPCPlatform_NewClient(t *testing.T) {
 				platformOptions: []PlatformOption{insecureTransport},
 			},
 			expected{
-				target: pointer("/testNewServer/"),
+				target: new("/testNewServer/"),
 			},
 		}, {
 			"Target name with etcd prefix",
@@ -258,7 +259,7 @@ func TestRPCPlatform_NewClient(t *testing.T) {
 				platformOptions: []PlatformOption{insecureTransport},
 			},
 			expected{
-				target: pointer("/rpcplatform/testNewServer/"),
+				target: new("/rpcplatform/testNewServer/"),
 			},
 		}, {
 			"Provide MaxActiveServers option",
@@ -270,7 +271,7 @@ func TestRPCPlatform_NewClient(t *testing.T) {
 				},
 			},
 			expected{
-				maxActiveServers: pointer(10),
+				maxActiveServers: new(10),
 			},
 		}, {
 			"Provide options that gRPC relies on",
@@ -288,7 +289,7 @@ func TestRPCPlatform_NewClient(t *testing.T) {
 				},
 			},
 			expected{
-				grpcOptionsLen: pointer(6 + 2), // NewClient adds 2 additional options
+				grpcOptionsLen: new(6 + 2), // NewClient adds 2 additional options
 			},
 		},
 	}
@@ -305,7 +306,7 @@ func TestRPCPlatform_NewClient(t *testing.T) {
 				t.Fatalf("New() failed: %v", err)
 			}
 
-			client, err := rpcp.NewClient(context.Background(), tt.input.target, tt.input.clientOptions...)
+			client, err := rpcp.NewClient(context.Background(), tt.input.target, proto.NewSumClient, tt.input.clientOptions...)
 			if err != nil {
 				t.Fatalf("NewClient() failed: %v", err)
 			}
@@ -369,7 +370,7 @@ func TestRPCPlatform_NewServer(t *testing.T) {
 				name: "testNewServer",
 			},
 			expected{
-				name: pointer("/testNewServer"),
+				name: new("/testNewServer"),
 			},
 		}, {
 			"Server name with etcd prefix",
@@ -378,7 +379,7 @@ func TestRPCPlatform_NewServer(t *testing.T) {
 				name:       "testNewServer",
 			},
 			expected{
-				name: pointer("/rpcplatform/testNewServer"),
+				name: new("/rpcplatform/testNewServer"),
 			},
 		}, {
 			"Listen on 127.0.0.1 with port 0",
@@ -398,7 +399,7 @@ func TestRPCPlatform_NewServer(t *testing.T) {
 				},
 			},
 			expected{
-				publicAddr: pointer("1.2.3.4:56789"),
+				publicAddr: new("1.2.3.4:56789"),
 			},
 		}, {
 			"Provide Attributes option",
@@ -432,7 +433,7 @@ func TestRPCPlatform_NewServer(t *testing.T) {
 				},
 			},
 			expected{
-				grpcOptionsLen: pointer(5),
+				grpcOptionsLen: new(5),
 			},
 		},
 	}
@@ -449,7 +450,7 @@ func TestRPCPlatform_NewServer(t *testing.T) {
 				t.Fatalf("New() failed: %v", err)
 			}
 
-			server, err := rpcp.NewServer(tt.input.name, tt.input.addr, tt.input.serverOptions...)
+			server, err := rpcp.NewServer(tt.input.name, tt.input.addr, proto.RegisterSumServer, &sumServer{}, tt.input.serverOptions...)
 			if err != nil {
 				t.Fatalf("NewServer() failed: %v", err)
 			}
@@ -528,6 +529,12 @@ func getEtcdClient(t *testing.T) *etcd.Client {
 	return etcdClient
 }
 
-func pointer[T any](v T) *T {
-	return &v
+type sumServer struct {
+	proto.UnimplementedSumServer
+}
+
+func (s *sumServer) Sum(_ context.Context, request *proto.SumRequest) (*proto.SumResponse, error) {
+	return proto.SumResponse_builder{
+		Sum: new(int64(0)),
+	}.Build(), nil
 }

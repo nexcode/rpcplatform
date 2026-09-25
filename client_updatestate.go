@@ -21,7 +21,7 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
-func (c *Client) updateState(init bool, serverInfoTree map[string]*ServerInfo) {
+func (c *Client[T]) updateState(init bool, serverInfoTree map[string]*ServerInfo) {
 	state := resolver.State{
 		Endpoints:  make([]resolver.Endpoint, 0, len(serverInfoTree)),
 		Attributes: grpcattrs.SetClientConfig(nil, c.config),

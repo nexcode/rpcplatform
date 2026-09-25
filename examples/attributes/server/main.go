@@ -65,12 +65,10 @@ func main() {
 	attributes := rpcplatform.NewAttributes()
 	attributes.BalancerWeight = 4
 
-	server, err := rpcp.NewServer("myServerName", "localhost:", rpcplatform.ServerOptions.Attributes(attributes))
+	server, err := rpcp.NewServer("myServerName", "localhost:", proto.RegisterSumServer, &sumServer{}, rpcplatform.ServerOptions.Attributes(attributes))
 	if err != nil {
 		panic(err)
 	}
-
-	proto.RegisterSumServer(server.Server(), &sumServer{})
 
 	if err = server.Serve(context.Background()); err != nil {
 		panic(err)

@@ -19,6 +19,7 @@ package rpcplatform
 import (
 	"fmt"
 	"net"
+	"reflect"
 	"strings"
 
 	"github.com/nexcode/rpcplatform/internal/config"
@@ -29,9 +30,14 @@ import (
 // NewServer creates a new server with the given name listening on addr.
 // If addr is empty, the server listens on all available interfaces.
 // If the port is 0, a random available port is automatically assigned.
-func (p *RPCPlatform) NewServer(name, addr string, options ...ServerOption) (*Server, error) {
+func (p *RPCPlatform) NewServer[T any](name, addr string, newServer func(s grpc.ServiceRegistrar, service T), service any, options ...ServerOption) (*Server, error) {
 	if name == "" || strings.Contains(name, "/") {
 		return nil, fmt.Errorf("%q: name is empty or contains «/»: %w", name, ErrInvalidServerName)
+	}
+
+	serviceImpl, ok := service.(T)
+	if !ok {
+		return nil, fmt.Errorf("%T does not implement %v: %w", service, reflect.TypeFor[T](), ErrMismatchServiceType)
 	}
 
 	config := config.NewServer()
@@ -64,17 +70,21 @@ func (p *RPCPlatform) NewServer(name, addr string, options ...ServerOption) (*Se
 
 		statsHandler, err := p.openTelemetry(id, listener.Addr(), addr)
 		if err != nil {
+			listener.Close()
 			return nil, err
 		}
 
 		config.GRPCOptions = append(config.GRPCOptions, grpc.StatsHandler(statsHandler))
 	}
 
+	server := grpc.NewServer(config.GRPCOptions...)
+	newServer(server, serviceImpl)
+
 	return &Server{
 		id:       id,
 		name:     p.etcdPrefix + "/" + name,
 		etcd:     p.etcdClient,
-		server:   grpc.NewServer(config.GRPCOptions...),
+		server:   server,
 		listener: listener,
 		config:   config,
 	}, nil
