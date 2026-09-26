@@ -31,7 +31,7 @@ import (
 )
 
 // NewClient creates a new client connecting to the specified server name.
-func (p *RPCPlatform) NewClient[T any](ctx context.Context, target string, newClient func(cc grpc.ClientConnInterface) T, options ...ClientOption) (*Client[T], error) {
+func (p *RPCPlatform) NewClient[T any](ctx context.Context, target string, newClient func(grpc.ClientConnInterface) T, options ...ClientOption) (*Client[T], error) {
 	if target == "" || strings.Contains(target, "/") {
 		return nil, fmt.Errorf("%q: target is empty or contains «/»: %w", target, ErrInvalidTargetName)
 	}

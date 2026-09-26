@@ -30,7 +30,7 @@ import (
 // NewServer creates a new server with the given name listening on addr.
 // If addr is empty, the server listens on all available interfaces.
 // If the port is 0, a random available port is automatically assigned.
-func (p *RPCPlatform) NewServer[T any](name, addr string, newServer func(s grpc.ServiceRegistrar, service T), service any, options ...ServerOption) (*Server, error) {
+func (p *RPCPlatform) NewServer[T any](name, addr string, newServer func(grpc.ServiceRegistrar, T), service any, options ...ServerOption) (*Server, error) {
 	if name == "" || strings.Contains(name, "/") {
 		return nil, fmt.Errorf("%q: name is empty or contains «/»: %w", name, ErrInvalidServerName)
 	}
